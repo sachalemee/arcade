@@ -5,6 +5,8 @@
 ** Core
 */
 
+#include <dlfcn.h>
+
 int core()
 {
     return 0;

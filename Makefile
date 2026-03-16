@@ -24,8 +24,10 @@ CXXFLAGS 	+= -Wall -Wextra
 
 CPPFLAGS 	+= -I include/
 
+LIBFLAG 	+= -ldl
+
 $(NAME): 	$(OBJ)
-			$(CXX) $(OBJ) -o $(NAME)
+			$(CXX) $(OBJ) -o $(NAME) $(LIBFLAG)
 
 clean:
 			$(RM) $(OBJ)
