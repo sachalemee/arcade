@@ -29,6 +29,19 @@ LIBFLAG 	+= -ldl
 $(NAME): 	$(OBJ)
 			$(CXX) $(OBJ) -o $(NAME) $(LIBFLAG)
 
+## it must only build the core of your arcade
+## (not the games nor the graphical librairies).
+core: 		$(OBJ)
+			$(CXX) $(OBJ) -o $(NAME) $(LIBFLAG)
+
+## it must only build your games librairies.
+games: 		$(OBJ)
+			$(CXX) $(OBJ) -o $(NAME) $(LIBFLAG)
+
+## it must only build your graphical librairies.
+graphical: 	$(OBJ)
+			$(CXX) $(OBJ) -o $(NAME) $(LIBFLAG)
+
 clean:
 			$(RM) $(OBJ)
 
