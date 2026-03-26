@@ -1,13 +1,26 @@
 # ARCADE (v0.1)
 
-![Arcade img1](screenshots/G-OOP-400_arcade.pdf)
+![Arcade Game example picture](screenshots/arcade_game_picture.png)
 
 ### Development
 By *Evans Ramin, Marin Jeunot & Sacha Lemée*.
+```
+evans.ramin@epitech.eu
+marin.jeunot@epitech.eu
+sacha.lemee@epitech.eu
+```
 
 ### Contribution
 Shared general architecture with *Nicolas Gonzales, Daniel Lozovan & Thibault Maillet*.
+```
+nicolas.gonzales@epitech.eu
+daniel.lozovan@epitech.eu
+thibault.maillet@epitech.eu
+```
 
-## 📄 License
+## License
 
 This project is licensed under the **Creative Commons Attribution-ShareAlike 4.0 International License** (CC BY-SA 4.0 DEED).
+
+
+![Arcade Project License](screenshots/License_AttributionShareAlike_4.0_International.png)
