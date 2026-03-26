@@ -14,7 +14,6 @@ class Core {
     public:
         ~Core() = default;
         int core();
-
     protected:
     private:
 };
