@@ -5,13 +5,24 @@
 ** Core
 */
 
-#pragma once
+#ifndef CORE_H
+    #define CORE_H
+
+#include <string>
 
 class Core {
     public:
-        Core();
-        ~Core();
+        ~Core() = default;
+        int core();
 
     protected:
     private:
 };
+
+struct Player {
+    std::string name;
+    int score;
+    int highScore;
+};
+
+#endif /* CORE_H */
