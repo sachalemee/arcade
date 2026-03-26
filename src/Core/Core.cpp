@@ -6,8 +6,9 @@
 */
 
 #include <dlfcn.h>
+#include "Core.hpp"
 
-int core()
+int Core::core()
 {
     return 0;
 }
