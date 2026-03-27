@@ -18,6 +18,9 @@ daniel.lozovan@epitech.eu
 thibault.maillet@epitech.eu
 ```
 
+### Documentation used
+- dlopen/dlclose/dlsysm : https://tldp.org/HOWTO/html_single/C%2B%2B-dlopen/?utm_source=chatgpt.com#externC
+
 ## License
 
 This project is licensed under the **Creative Commons Attribution-ShareAlike 4.0 International License** (CC BY-SA 4.0 DEED).
