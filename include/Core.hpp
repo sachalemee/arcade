@@ -5,8 +5,8 @@
 ** Core
 */
 
-#ifndef CORE_H
-    #define CORE_H
+#ifndef CORE_HPP
+    #define CORE_HPP
 
 #include <string>
 
@@ -24,4 +24,4 @@ struct Player {
     int highScore;
 };
 
-#endif /* CORE_H */
+#endif /* CORE_HPP */

@@ -5,13 +5,13 @@
 ** DLLoader
 */
 
-#ifndef DLLOADER_H
-    #define DLLOADER_H
+#ifndef DLLOADER_HPP
+    #define DLLOADER_HPP
 
-#include <dlfcn.h>
-#include <memory>
-#include <stdexcept>
-#include <string>
+    #include <dlfcn.h>
+    #include <memory>
+    #include <stdexcept>
+    #include <string>
 
 template<typename T>
 class DLLoader {
@@ -58,4 +58,4 @@ class DLLoader {
 // and you don't have to delete since it's a unique so it's done automatically
 
 
-#endif /* DLLOADER_H */
+#endif /* DLLOADER_HPP */
