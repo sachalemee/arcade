@@ -2,52 +2,69 @@
 ## EPITECH PROJECT, 2026
 ## arcade
 ## File description:
-## Makefile
+## Makefile for arcade project
 ##
 
-SRC =		$(addprefix src/, \
- 				main.cpp \
-				$(addprefix Core/, \
-					Core.cpp \
-				)\
-			)
+CXX				?= clang++
+CXXFLAGS		+= -Wall -Wextra -fPIC -fno-gnu-unique
+CPPFLAGS		+= -I include/
+LDFLAGS			+= -ldl
 
-OBJ =		$(SRC:.cpp=.o)
+CORE_SRC		=	src/main.cpp \
+					src/Core/Core.cpp
 
-NAME =		arcarde
+CORE_OBJ		=	$(CORE_SRC:.cpp=.o)
 
-all: 		$(NAME)
+ARCADE			=	arcade
 
-CXX 		?= clang++
+LIB_DIR			=	lib
 
-CXXFLAGS 	+= -Wall -Wextra
+GAMES_SRC		=	src/Snake.cpp
 
-CPPFLAGS 	+= -I include/
+GAMES_SO		=	$(LIB_DIR)/arcade_snake.so
 
-LIBFLAG 	+= -ldl
+GRAPHICS_SRC	=	src/NcursesGraph.cpp \
+					src/SfmlGraph.cpp
 
-$(NAME): 	$(OBJ)
-			$(CXX) $(OBJ) -o $(NAME) $(LIBFLAG)
+GRAPHICS_SO		=	$(LIB_DIR)/arcade_ncurses.so \
+					$(LIB_DIR)/arcade_sfml.so
 
-## it must only build the core of your arcade
-## (not the games nor the graphical librairies).
-core: 		$(OBJ)
-			$(CXX) $(OBJ) -o $(NAME) $(LIBFLAG)
+all:			$(ARCADE) games graphicals
 
-## it must only build your games librairies.
-games: 		$(OBJ)
-			$(CXX) $(OBJ) -o $(NAME) $(LIBFLAG)
+lib:
+				mkdir -p $(LIB_DIR)
 
-## it must only build your graphical librairies.
-graphical: 	$(OBJ)
-			$(CXX) $(OBJ) -o $(NAME) $(LIBFLAG)
+$(ARCADE):		$(CORE_OBJ)
+				$(CXX) $(CORE_OBJ) -o $(ARCADE) $(LDFLAGS)
+
+%.o:			%.cpp
+				$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
+
+$(LIB_DIR)/arcade_snake.so: lib src/Snake.cpp
+				$(CXX) $(CXXFLAGS) $(CPPFLAGS) -shared src/Snake.cpp -o $@
+
+$(LIB_DIR)/arcade_ncurses.so: lib src/NcursesGraph.cpp
+				$(CXX) $(CXXFLAGS) $(CPPFLAGS) -shared src/NcursesGraph.cpp -o $@ -lncurses
+
+$(LIB_DIR)/arcade_sfml.so: lib src/SfmlGraph.cpp
+				$(CXX) $(CXXFLAGS) $(CPPFLAGS) -shared src/SfmlGraph.cpp -o $@ $(shell pkg-config --cflags --libs sfml-graphics 2>/dev/null || echo "-lsfml-graphics -lsfml-window -lsfml-system")
+
+core:			$(ARCADE)
+				@echo "✓ Core arcade executable built"
+
+games:			lib $(GAMES_SO)
+				@echo "✓ Games libraries built"
+
+graphicals:		lib $(GRAPHICS_SO)
+				@echo "✓ Graphical libraries built"
 
 clean:
-			$(RM) $(OBJ)
+				$(RM) $(CORE_OBJ)
 
-fclean: 	clean
-			$(RM) $(NAME)
+fclean:			clean
+				$(RM) $(ARCADE)
+				$(RM) -r $(LIB_DIR)
 
-re: 		fclean all
+re:				fclean all
 
-.PHONY: 	all clean fclean re
+.PHONY:			all core games graphicals lib clean fclean re
