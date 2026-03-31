@@ -1,0 +1,39 @@
+/*
+** EPITECH PROJECT, 2026
+** $
+** File description:
+** LibManager
+*/
+
+#ifndef LIBMANAGER_HPP
+    #define LIBMANAGER_HPP
+
+    #include <cstdlib>
+    #include <string>
+    #include <vector>
+    #include <dlfcn.h>
+
+    const int EXITSUCCESS = 0;
+    const int EXITFAILURE = 84;
+    const std::string LIBDIRECTORY = "./lib/";
+    const std::string GAMEPREFIX = "arcade_";
+    const std::string GAMEEXTENSION = ".so";
+
+class LibManager {
+    public:
+        LibManager() = default;
+        ~LibManager() = default;
+        void loadAndIdentify(const std::string &libName);
+        void scanDirectory(const std::string &dir);
+        bool isGame() const;
+        bool isDisplay() const;
+        const std::vector<std::string> &getGameLibs() const;
+        const std::vector<std::string> &getDisplayLibs() const;
+    protected:
+        bool isGameLib = false;
+        bool isDisplayLib = false;
+        std::vector<std::string> gameLibs;
+        std::vector<std::string> displayLibs;
+};
+
+#endif /* LIBMANAGER_HPP */
