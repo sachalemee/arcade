@@ -26,12 +26,11 @@ class Core {
     public:
         Core(const std::string &initialDisplayLib);
         ~Core() = default;
-        int core();
         int run();
 
     private:
-        void switchDisplay();
-        void switchgame();
+        void switchDisplay(const std::string &path);
+        void switchGame(const std::string &path);
         void handleInput(Input input);
         void saveScore();
         void loadScores();
@@ -47,7 +46,7 @@ class Core {
         std::unique_ptr<IGame> mGame;
 
         bool mIsRunning = true;
-        bool mIsMenu = true;
+        bool mInMenu = true;
 };
 
 #endif /* CORE_HPP */
