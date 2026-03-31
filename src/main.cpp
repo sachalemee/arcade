@@ -16,19 +16,19 @@ bool LibManager::loadAndIdentify(const std::string &libName)
 {
     void *handle = dlopen(libName.c_str(), RTLD_NOW | RTLD_LOCAL);
 
-    isGameLib = false;
-    isDisplayLib = false;
+    mIsGameLib = false;
+    mIsDisplayLib = false;
     if (!handle) {
         std::cerr << "Error: " << dlerror() << "\n";
         return false;
     }
     dlerror();
     if (dlsym(handle, "createDisplay") && !dlerror())
-        isDisplayLib = true;
+        mIsDisplayLib = true;
     else if (dlsym(handle, "createGame") && !dlerror())
-        isGameLib = true;
+        mIsGameLib = true;
     dlclose(handle);
-    currentLib = libName;
+    mCurrentLib = libName;
     return true;
 }
 
@@ -37,12 +37,12 @@ void LibManager::fillLibVector(void *handle, void *sym, const std::filesystem::p
     dlerror();
     sym = dlsym(handle, "createDisplay");
     if (sym && !dlerror())
-        displayLibs.push_back(path.string());
+        mDisplayLibs.push_back(path.string());
     else {
         dlerror();
         sym = dlsym(handle, "createGame");
         if (sym && !dlerror())
-            gameLibs.push_back(path.string());
+            mGameLibs.push_back(path.string());
     }
 }
 

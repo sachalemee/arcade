@@ -27,18 +27,18 @@ class LibManager {
         void scanDirectory(const std::string &dir);
         void fillLibVector(void *handle, void *sym, const std::filesystem::path &path);
 
-        bool isGame() const { return isGameLib; }
-        bool isDisplay() const { return isDisplayLib; }
+        bool isGame() const { return mIsGameLib; }
+        bool isDisplay() const { return mIsDisplayLib; }
 
-        const std::vector<std::string> &getGameLibs() const { return gameLibs; }
-        const std::vector<std::string> &getDisplayLibs() const { return displayLibs; }
+        const std::vector<std::string> &getGameLibs() const { return mGameLibs; }
+        const std::vector<std::string> &getDisplayLibs() const { return mDisplayLibs; }
 
-    protected:
-        bool isGameLib = false;
-        bool isDisplayLib = false;
-        std::vector<std::string> gameLibs;
-        std::vector<std::string> displayLibs;
-        std::string currentLib;
+    private:
+        bool mIsGameLib = false;
+        bool mIsDisplayLib = false;
+        std::vector<std::string> mGameLibs;
+        std::vector<std::string> mDisplayLibs;
+        std::string mCurrentLib;
 };
 
 #endif /* LIBMANAGER_HPP */
