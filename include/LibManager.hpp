@@ -23,10 +23,13 @@ class LibManager {
     public:
         LibManager() = default;
         ~LibManager() = default;
-        void loadAndIdentify(const std::string &libName);
+
+        bool loadAndIdentify(const std::string &libName);
         void scanDirectory(const std::string &dir);
+
         bool isGame() const;
         bool isDisplay() const;
+
         const std::vector<std::string> &getGameLibs() const;
         const std::vector<std::string> &getDisplayLibs() const;
     protected:
@@ -34,6 +37,7 @@ class LibManager {
         bool isDisplayLib = false;
         std::vector<std::string> gameLibs;
         std::vector<std::string> displayLibs;
+        std::string currentLib;
 };
 
 #endif /* LIBMANAGER_HPP */
