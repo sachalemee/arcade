@@ -33,7 +33,26 @@ bool LibManager::loadAndIdentify(const std::string &libName)
 
 void LibManager::scanDirectory(const std::string &dir)
 {
-    return;
+    std::filesystem::directory_iterator it(dir);
+    std::filesystem::directory_iterator end;
+    std::filesystem::directory_entry entry;
+    std::filesystem::path path;
+    void *handle;
+
+    for (; it != end; ++it) {
+        entry = *it;
+        path = entry.path();
+        if (path.extension() != GAMEEXTENSION)
+            continue;
+        handle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL);
+        if (!handle)
+            continue;
+        if (dlsym(handle, "createDisplay") && !dlerror())
+            displayLibs.push_back(path.string());
+        else if (dlsym(handle, "createGame") && !dlerror())
+            gameLibs.push_back(path.string());
+        dlclose(handle);
+    }
 }
 
 int helper(void)
