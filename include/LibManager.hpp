@@ -30,8 +30,8 @@ class LibManager {
         bool isGame() const { return isGameLib; }
         bool isDisplay() const { return isDisplayLib; }
 
-        const std::vector<std::string> &getGameLibs() const;
-        const std::vector<std::string> &getDisplayLibs() const;
+        const std::vector<std::string> &getGameLibs() const { return gameLibs; }
+        const std::vector<std::string> &getDisplayLibs() const { return displayLibs; }
 
     protected:
         bool isGameLib = false;
