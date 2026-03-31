@@ -25,10 +25,9 @@ static int helper(void)
 
 int error_handling(int ac, char **av, LibManager &libManager)
 {
-    std::filesystem::path libPath(av[1]);
- 
     if (ac != 2)
         return helper();
+    std::filesystem::path libPath(av[1]);
     if (!std::filesystem::exists(libPath)) {
         std::cerr << "Error: '" << av[1] << "' not found\n";
         return EXITFAILURE;
