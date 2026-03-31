@@ -36,7 +36,8 @@ int error_handling(int ac, char **av, LibManager &libManager)
         std::cerr << "Error: '" << av[1] << "' not a .so file\n";
         return EXITFAILURE;
     }
-    if (!libManager.loadAndIdentify(av[1])) {
+    if (!libManager.loadAndIdentify(av[1])
+        || !libManager.isDisplay()) {
         std::cerr << "Error: '" << av[1] << "' not a graphical library\n";
         return EXITFAILURE;
     }

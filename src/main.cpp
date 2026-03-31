@@ -23,14 +23,27 @@ bool LibManager::loadAndIdentify(const std::string &libName)
         return false;
     }
     dlerror();
-    if (dlsym(handle, "createDisplay") && !dlerror()) {
+    if (dlsym(handle, "createDisplay") && !dlerror())
         isDisplayLib = true;
-    } else if (dlsym(handle, "createGame") && !dlerror()) {
+    else if (dlsym(handle, "createGame") && !dlerror())
         isGameLib = true;
-    }
     dlclose(handle);
     currentLib = libName;
     return true;
+}
+
+void LibManager::fillLibVector(void *handle, void *sym, const std::filesystem::path &path)
+{
+    dlerror();
+    sym = dlsym(handle, "createDisplay");
+    if (sym && !dlerror())
+        displayLibs.push_back(path.string());
+    else {
+        dlerror();
+        sym = dlsym(handle, "createGame");
+        if (sym && !dlerror())
+            gameLibs.push_back(path.string());
+    }
 }
 
 void LibManager::scanDirectory(const std::string &dir)
@@ -39,7 +52,8 @@ void LibManager::scanDirectory(const std::string &dir)
     std::filesystem::directory_iterator end;
     std::filesystem::directory_entry entry;
     std::filesystem::path path;
-    void *handle;
+    void *handle = nullptr;
+    void *sym = nullptr;
 
     for (; it != end; ++it) {
         entry = *it;
@@ -49,10 +63,7 @@ void LibManager::scanDirectory(const std::string &dir)
         handle = dlopen(path.c_str(), RTLD_NOW | RTLD_LOCAL);
         if (!handle)
             continue;
-        if (dlsym(handle, "createDisplay") && !dlerror())
-            displayLibs.push_back(path.string());
-        else if (dlsym(handle, "createGame") && !dlerror())
-            gameLibs.push_back(path.string());
+        fillLibVector(handle, sym, path);
         dlclose(handle);
     }
 }

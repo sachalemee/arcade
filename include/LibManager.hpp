@@ -9,6 +9,7 @@
     #define LIBMANAGER_HPP
 
     #include <cstdlib>
+    #include <filesystem>
     #include <string>
     #include <vector>
     #include <dlfcn.h>
@@ -24,9 +25,14 @@ class LibManager {
 
         bool loadAndIdentify(const std::string &libName);
         void scanDirectory(const std::string &dir);
+        void fillLibVector(void *handle, void *sym, const std::filesystem::path &path);
+
+        bool isGame() const { return isGameLib; }
+        bool isDisplay() const { return isDisplayLib; }
 
         const std::vector<std::string> &getGameLibs() const;
         const std::vector<std::string> &getDisplayLibs() const;
+
     protected:
         bool isGameLib = false;
         bool isDisplayLib = false;
