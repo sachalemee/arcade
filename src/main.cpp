@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <iostream>
 #include "LibManager.hpp"
+#include "arcade.hpp"
 
 bool LibManager::loadAndIdentify(const std::string &libName)
 {
@@ -32,16 +33,7 @@ bool LibManager::loadAndIdentify(const std::string &libName)
 
 void LibManager::scanDirectory(const std::string &dir)
 {
-}
-
-bool LibManager::isGame() const
-{
-    return isGameLib;
-}   
-
-bool LibManager::isDisplay() const
-{
-    return isDisplayLib;
+    return;
 }
 
 int helper(void)
@@ -61,14 +53,18 @@ int error_handling(int ac, char **av, LibManager &libManager)
  
     if (ac != 2)
         return helper();
-    if (!libManager.isDisplay()) {
+    if (!std::filesystem::exists(libPath)) {
+        std::cerr << "Error: '" << av[1] << "' not found\n";
+        return EXITFAILURE;
+    }
+    if (libPath.extension() != GAMEEXTENSION) {
+        std::cerr << "Error: '" << av[1] << "' not a .so file\n";
+        return EXITFAILURE;
+    }
+    if (!libManager.loadAndIdentify(av[1])) {
         std::cerr << "Error: '" << av[1] << "' not a graphical library\n";
         return EXITFAILURE;
     }
-    if (!std::filesystem::exists(libPath)
-        || strcmp(libPath.string().c_str(),
-        GAMEEXTENSION.c_str()) != EXITSUCCESS)
-        return EXITFAILURE;
     return EXITSUCCESS;
 }
 

@@ -13,8 +13,6 @@
     #include <vector>
     #include <dlfcn.h>
 
-    const int EXITSUCCESS = 0;
-    const int EXITFAILURE = 84;
     const std::string LIBDIRECTORY = "./lib/";
     const std::string GAMEPREFIX = "arcade_";
     const std::string GAMEEXTENSION = ".so";
