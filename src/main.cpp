@@ -16,6 +16,8 @@ bool LibManager::loadAndIdentify(const std::string &libName)
 {
     void *handle = dlopen(libName.c_str(), RTLD_NOW | RTLD_LOCAL);
 
+    isGameLib = false;
+    isDisplayLib = false;
     if (!handle) {
         std::cerr << "Error: " << dlerror() << "\n";
         return false;

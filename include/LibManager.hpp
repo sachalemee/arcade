@@ -25,9 +25,6 @@ class LibManager {
         bool loadAndIdentify(const std::string &libName);
         void scanDirectory(const std::string &dir);
 
-        bool isGame() const;
-        bool isDisplay() const;
-
         const std::vector<std::string> &getGameLibs() const;
         const std::vector<std::string> &getDisplayLibs() const;
     protected:
