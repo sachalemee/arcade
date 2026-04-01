@@ -54,8 +54,28 @@ int NCursesDisplay::getColorPair(const Color &c)
     return mNextPair++;
 }
 
+int NCursesDisplay::tileToChar(TileType type) const
+{
+    switch (type) {
+        case TileType::WALL: return '#';
+        case TileType::PLAYER: return '@';
+        case TileType::ENEMY: return 'X';
+        case TileType::FOOD: return '*';
+        case TileType::EMPTY: return ' ';
+        default: return '?';
+    }
+}
+
 void NCursesDisplay::draw(const std::vector<Tile> &tiles)
 {
+    int pair = 0;
+
+    for (const auto &tile: tiles) {
+        pair = getColorPair(tile.color);
+        attron(COLOR_PAIR(pair));
+        mvaddch(tile.y, tile.x, tileToChar(tile.type));
+        attroff(COLOR_PAIR(pair));
+    } 
 }
 
 void NCursesDisplay::display()

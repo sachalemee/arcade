@@ -32,6 +32,7 @@ class NCursesDisplay : public IDisplay {
 
         int toNCursesColor(u_int8_t channel);
         int getColorPair(const Color &c);
+        int tileToChar(TileType type) const;
 };
 
 #endif /* NCURSESDISPLAY_HPP */
