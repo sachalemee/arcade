@@ -9,6 +9,7 @@
     #define NCURSESDISPLAY_HPP
 
 #include "IDisplay.hpp"
+#include <unordered_map>
 
 class NCursesDisplay : public IDisplay {
     public:
@@ -24,6 +25,9 @@ class NCursesDisplay : public IDisplay {
         Input getInput() override;
 
     private:
+        std::unordered_map<int, int> mColorPairs;
+        int toNCursesColor(u_int8_t channel);
+        int getColorPair(const Color &c);
 };
 
 #endif /* NCURSESDISPLAY_HPP */

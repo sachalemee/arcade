@@ -12,6 +12,9 @@
     #include <cstdint>
     #include <vector>
 
+    const int ESCKEY = 27;
+    const char SPACEKEY = '\n';
+
 struct Color {
     uint8_t r, g, b, a = 255;
 };
