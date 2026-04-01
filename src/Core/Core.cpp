@@ -11,6 +11,7 @@
 #include "Core.hpp"
 #include "DLLoader.hpp"
 #include "IDisplay.hpp"
+#include "IGame.hpp"
 #include "LibManager.hpp"
 #include "arcade.hpp"
 
@@ -36,8 +37,13 @@ void Core::switchDisplay(const std::string &path)
     return;
 }
 
-void Core::switchGame(const std::string &initialDisplayLib)
+void Core::switchGame(const std::string &path)
 {
+    if (mGame)
+        mGame->stop();
+    mGameLoader = std::make_unique<DLLoader<IGame>>(path);
+    mGame = mGameLoader->getInstance("createGame");
+    mGame->init();
     mInMenu = false;
     return;
 }

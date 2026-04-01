@@ -29,12 +29,12 @@ class Core {
         int run();
 
     private:
+        void isGameEnded();
         void switchDisplay(const std::string &path);
         void switchGame(const std::string &path);
         void handleInput(Input input);
         void saveScore();
         void loadScores();
-        void isGameEnded();
 
         LibManager mLibManager;
         Player mPlayer;

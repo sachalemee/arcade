@@ -9,6 +9,7 @@
 #include <dlfcn.h>
 #include <filesystem>
 #include <iostream>
+#include "Core.hpp"
 #include "LibManager.hpp"
 #include "arcade.hpp"
 
