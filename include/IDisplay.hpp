@@ -18,15 +18,17 @@ struct Color {
 
 enum class Input {
     NONE,
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-    SCORE,
-    SON,
-    RESTART,
-    MENU,
-    EXIT
+    UP,                      // ↑
+    DOWN,                    // ↓
+    LEFT,                    // <-
+    RIGHT,                   // ->
+    NEXT_GAME,               // N
+    NEXT_LIB,                // L
+    RESTART,                 // R
+    MENU,                    // Esc
+    EXIT,                    // E
+    SELECT,                  // Enter
+    TOGGLE_SOUND             // Space
 };
 
 enum class TileType {
