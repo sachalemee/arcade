@@ -10,8 +10,15 @@ CXXFLAGS		+= -Wall -Wextra -fPIC -fno-gnu-unique
 CPPFLAGS		+= -I include/
 LDFLAGS			+= -ldl
 
-CORE_SRC		=	src/main.cpp \
-					src/Core/Core.cpp
+CORE_SRC		=	$(addprefix src/
+						main.cpp \
+						$(addprefix Core/
+							Core.cpp \
+						)\
+						$(addprefix ErrorHandling/
+							errorHandling.cpp \
+						)\
+					)
 
 CORE_OBJ		=	$(CORE_SRC:.cpp=.o)
 
@@ -19,12 +26,16 @@ ARCADE			=	arcade
 
 LIB_DIR			=	lib
 
-GAMES_SRC		=	src/Snake.cpp
+GAMES_SRC		=	$(addprefix src/,
+						Snake.cpp \
+					)
 
 GAMES_SO		=	$(LIB_DIR)/arcade_snake.so
 
-GRAPHICS_SRC	=	src/NcursesGraph.cpp \
-					src/SfmlGraph.cpp
+GRAPHICS_SRC	=	$(addprefix src/
+						NcursesGraph.cpp \
+						SfmlGraph.cpp \
+					)
 
 GRAPHICS_SO		=	$(LIB_DIR)/arcade_ncurses.so \
 					$(LIB_DIR)/arcade_sfml.so
