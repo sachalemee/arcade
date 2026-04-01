@@ -24,7 +24,23 @@ Core::Core(const std::string &initialDisplayLib)
 
 void Core::handleInput(Input input)
 {
-    return;
+    const auto &displayLibs = mLibManager.getDisplayLibs();
+    const auto &gameLibs = mLibManager.getGameLibs();
+
+    if (input == Input::EXIT) {
+        mIsRunning = false;
+        return;
+    }
+    if (input == Input::MENU) {
+        mInMenu = true;
+        mGame.reset();
+        mGameLoader.reset();
+        return;
+    }
+    if (input == Input::RESTART && mGame) {
+        mGame->init();
+        return;
+    }
 }
 
 void Core::switchDisplay(const std::string &path)
@@ -34,7 +50,6 @@ void Core::switchDisplay(const std::string &path)
     mDisplayLoader = std::make_unique<DLLoader<IDisplay>>(path);
     mDisplay = mDisplayLoader->getInstance("createDisplay");
     mDisplay->init(600, 800, "Arcade");
-    return;
 }
 
 void Core::switchGame(const std::string &path)
@@ -45,7 +60,6 @@ void Core::switchGame(const std::string &path)
     mGame = mGameLoader->getInstance("createGame");
     mGame->init();
     mInMenu = false;
-    return;
 }
 
 void Core::isGameEnded()
