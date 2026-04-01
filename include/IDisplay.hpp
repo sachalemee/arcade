@@ -36,7 +36,7 @@ enum class TileType {
     WALL,
     PLAYER,
     ENEMY,
-    FOOD
+    FOOD,
 };
 
 struct Tile {
