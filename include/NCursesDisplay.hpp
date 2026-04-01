@@ -25,7 +25,11 @@ class NCursesDisplay : public IDisplay {
         Input getInput() override;
 
     private:
+        int mWidth;
+        int mHeight;
+        int mNextPair = 1;
         std::unordered_map<int, int> mColorPairs;
+
         int toNCursesColor(u_int8_t channel);
         int getColorPair(const Color &c);
 };

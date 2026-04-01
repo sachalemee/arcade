@@ -8,6 +8,7 @@
 #include <curses.h>
 #include <sys/types.h>
 #include "IDisplay.hpp"
+#include "arcade.hpp"
 #include "NCursesDisplay.hpp"
 
 int NCursesDisplay::toNCursesColor(u_int8_t channel)
@@ -42,6 +43,10 @@ int NCursesDisplay::getColorPair(const Color &c)
 
     if (it != mColorPairs.end())
         return it->second;
+    if (mNextPair >= COLOR_PAIRS)
+        return EXITSUCCESS;
+    mColorPairs[key] = mNextPair;
+    return mNextPair++;
 }
 
 void NCursesDisplay::draw(const std::vector<Tile> &tiles)
