@@ -34,6 +34,7 @@ class Core {
         void handleInput(Input input);
         void saveScore();
         void loadScores();
+        void isGameEnded();
 
         LibManager mLibManager;
         Player mPlayer;

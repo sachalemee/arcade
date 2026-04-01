@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <dlfcn.h>
 #include "Core.hpp"
+#include "IDisplay.hpp"
 #include "LibManager.hpp"
 #include "arcade.hpp"
 
@@ -34,10 +35,31 @@ void Core::switchGame(const std::string &initialDisplayLib)
     return;
 }
 
+void Core::isGameEnded()
+{
+    if (mGame->isOver()) {
+        mPlayer.score = mGame->getScore();
+        saveScore();
+        mInMenu = true;
+        mGame.reset();
+        mGameLoader.reset();
+    }
+}
+
 int Core::run()
 {
+    Input input = Input::NONE;
+
     while (mIsRunning) {
-        printf("drole\n");
+        input = mDisplay->getInput();
+        handleInput(input);
+        if (mGame) {
+            mGame->update(input);
+            mDisplay->clear();
+            mDisplay->draw(mGame->getMap());
+            mDisplay->display();
+            isGameEnded();
+        }
     }
     return EXITSUCCESS;
 }
