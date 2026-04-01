@@ -48,11 +48,11 @@ class IDisplay {
     public:
         virtual ~IDisplay() = default;
 
-        virtual void init(int width, int height, const std::string& title) = 0;
+        virtual void init(int width, int height, const std::string &title) = 0;
         virtual void close() = 0;
         virtual void clear() = 0;
         virtual void display() = 0;
-        virtual void draw(const std::vector<Tile>& tiles) = 0;
+        virtual void draw(const std::vector<Tile> &tiles) = 0;
         virtual Input getInput() = 0;
 };
 
