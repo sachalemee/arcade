@@ -7,7 +7,9 @@
 
 #include <cstdio>
 #include <dlfcn.h>
+#include <memory>
 #include "Core.hpp"
+#include "DLLoader.hpp"
 #include "IDisplay.hpp"
 #include "LibManager.hpp"
 #include "arcade.hpp"
@@ -24,8 +26,13 @@ void Core::handleInput(Input input)
     return;
 }
 
-void Core::switchDisplay(const std::string &initialDisplayLib)
+void Core::switchDisplay(const std::string &path)
 {
+    if (mDisplay)
+        mDisplay->close();
+    mDisplayLoader = std::make_unique<DLLoader<IDisplay>>(path);
+    mDisplay = mDisplayLoader->getInstance("createDisplay");
+    mDisplay->init(600, 800, "Arcade");
     return;
 }
 
