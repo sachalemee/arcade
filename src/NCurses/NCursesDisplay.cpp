@@ -45,6 +45,11 @@ int NCursesDisplay::getColorPair(const Color &c)
         return it->second;
     if (mNextPair >= COLOR_PAIRS)
         return EXITSUCCESS;
+    init_color(mNextPair,
+        toNCursesColor(c.r),
+        toNCursesColor(c.g),
+        toNCursesColor(c.b));
+    init_pair(mNextPair, mNextPair, COLOR_BLACK);
     mColorPairs[key] = mNextPair;
     return mNextPair++;
 }
