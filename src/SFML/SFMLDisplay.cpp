@@ -8,33 +8,32 @@
 #include "IDisplay.hpp"
 #include "SFMLDisplay.hpp"
 
-void SFMLDisplay::init(int width, int height, const std::string &title)
+Input SFMLDisplay::getInput()
 {
-
-}
-
-void SFMLDisplay::close()
-{
-
-}
-
-void SFMLDisplay::clear()
-{
-
-}
-
-void SFMLDisplay::display()
-{
+    return Input::NONE;
 }
 
 void SFMLDisplay::draw(const std::vector<Tile> &tiles)
 {
 }
 
-Input SFMLDisplay::getInput()
+void SFMLDisplay::display()
 {
-    return Input::NONE;
 }
+
+void SFMLDisplay::clear()
+{
+}
+
+
+void SFMLDisplay::close()
+{
+}
+
+void SFMLDisplay::init(int width, int height, const std::string &/* title */)
+{
+}
+
 
 extern "C" {
     IDisplay *createDisplay() {

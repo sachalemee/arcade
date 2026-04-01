@@ -5,34 +5,46 @@
 ** NCursesDisplay
 */
 
+#include <curses.h>
 #include "NCursesDisplay.hpp"
 
-void NCursesDisplay::init(int width, int height, const std::string &title)
+Input NCursesDisplay::getInput()
 {
-
-}
-
-void NCursesDisplay::close()
-{
-
-}
-
-void NCursesDisplay::clear()
-{
-
-}
-
-void NCursesDisplay::display()
-{
+    return Input::NONE;
 }
 
 void NCursesDisplay::draw(const std::vector<Tile> &tiles)
 {
 }
 
-Input NCursesDisplay::getInput()
+void NCursesDisplay::display()
 {
-    return Input::NONE;
+    refresh();
+}
+
+void NCursesDisplay::clear()
+{
+    ::clear();
+}
+
+
+void NCursesDisplay::close()
+{
+    endwin();
+}
+
+void NCursesDisplay::init(int width, int height, const std::string &/* title */)
+{
+    initscr();
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
+    nodelay(stdscr, TRUE);
+    curs_set(0);
+    if (has_colors()) {
+        start_color();
+        use_default_colors();
+    }
 }
 
 extern "C" {
