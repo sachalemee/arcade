@@ -36,7 +36,8 @@ enum class TileType {
     WALL,
     PLAYER,
     ENEMY,
-    FOOD
+    FOOD,
+    TEXT
 };
 
 struct Tile {
@@ -44,6 +45,7 @@ struct Tile {
     int y;
     TileType type;
     Color color;
+    std::string text = "";
 };
 
 class IDisplay {
