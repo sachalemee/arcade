@@ -20,7 +20,7 @@ class IGame {
         virtual std::vector<Tile> getMap() const = 0;
         virtual int getScore() const = 0;
         virtual bool isOver() const = 0;
-        virtual void stop() const = 0;
+        virtual void stop() = 0;
         virtual std::string getName() const = 0;
 };
 

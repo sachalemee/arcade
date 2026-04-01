@@ -17,9 +17,19 @@
 
 Core::Core(const std::string &initialDisplayLib)
 {
-    mLibManager.loadAndIdentify(LIBDIRECTORY);
+    mLibManager.scanDirectory(LIBDIRECTORY);
     loadScores();
     switchDisplay(initialDisplayLib);
+}
+
+void Core::saveScore()
+{
+    // save in a text file
+}
+
+void Core::loadScores()
+{
+    // load from a text file
 }
 
 void Core::handleInput(Input input)
