@@ -10,15 +10,11 @@ CXXFLAGS		+= -Wall -Wextra -fPIC -fno-gnu-unique
 CPPFLAGS		+= -I include/
 LDFLAGS			+= -ldl
 
-CORE_SRC		=	$(addprefix src/
-						main.cpp \
-						$(addprefix Core/
-							Core.cpp \
-						)\
-						$(addprefix ErrorHandling/
-							errorHandling.cpp \
-						)\
-					)
+CORE_SRC		=	src/main.cpp \
+					src/Core/Core.cpp \
+					src/ErrorHandling/errorHandling.cpp \
+					src/LibManager/LibManager.cpp \
+					src/menu/menu.cpp
 
 CORE_OBJ		=	$(CORE_SRC:.cpp=.o)
 
@@ -26,42 +22,46 @@ ARCADE			=	arcade
 
 LIB_DIR			=	lib
 
-GAMES_SRC		=	$(addprefix src/,
-						Snake.cpp \
-					)
+GRAPHICS_NCURSES_SRC	=	src/NCurses/NCursesDisplay.cpp
+GRAPHICS_SDL2_SRC		=	src/SDL2/SDL2Display.cpp
+GRAPHICS_SFML_SRC		=	src/SFML/SFMLDisplay.cpp
 
-GAMES_SO		=	$(LIB_DIR)/arcade_snake.so
-
-GRAPHICS_SRC	=	$(addprefix src/
-						NcursesGraph.cpp \
-						SfmlGraph.cpp \
-					)
+GRAPHICS_NCURSES_OBJ	=	$(GRAPHICS_NCURSES_SRC:.cpp=.o)
+GRAPHICS_SDL2_OBJ		=	$(GRAPHICS_SDL2_SRC:.cpp=.o)
+GRAPHICS_SFML_OBJ		=	$(GRAPHICS_SFML_SRC:.cpp=.o)
 
 GRAPHICS_SO		=	$(LIB_DIR)/arcade_ncurses.so \
+					$(LIB_DIR)/arcade_sdl2.so \
 					$(LIB_DIR)/arcade_sfml.so
+
+GAMES_SO		=	
+
 
 all:			$(ARCADE) games graphicals
 
 lib:
 				mkdir -p $(LIB_DIR)
 
-$(ARCADE):		$(CORE_OBJ)
+$(ARCADE):		$(CORE_OBJ) lib
 				$(CXX) $(CORE_OBJ) -o $(ARCADE) $(LDFLAGS)
+				@echo "✓ Core arcade executable built: $(ARCADE)"
 
 %.o:			%.cpp
 				$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $< -o $@
 
-$(LIB_DIR)/arcade_snake.so: lib src/Snake.cpp
-				$(CXX) $(CXXFLAGS) $(CPPFLAGS) -shared src/Snake.cpp -o $@
+$(LIB_DIR)/arcade_ncurses.so: $(GRAPHICS_NCURSES_OBJ) lib
+				$(CXX) $(CXXFLAGS) -shared $(GRAPHICS_NCURSES_OBJ) -o $@ -lncurses
+				@echo "✓ Built: $@"
 
-$(LIB_DIR)/arcade_ncurses.so: lib src/NcursesGraph.cpp
-				$(CXX) $(CXXFLAGS) $(CPPFLAGS) -shared src/NcursesGraph.cpp -o $@ -lncurses
+$(LIB_DIR)/arcade_sdl2.so: $(GRAPHICS_SDL2_OBJ) lib
+				$(CXX) $(CXXFLAGS) -shared $(GRAPHICS_SDL2_OBJ) -o $@ $(shell pkg-config --cflags --libs sdl2 2>/dev/null || echo "-lSDL2")
+				@echo "✓ Built: $@"
 
-$(LIB_DIR)/arcade_sfml.so: lib src/SfmlGraph.cpp
-				$(CXX) $(CXXFLAGS) $(CPPFLAGS) -shared src/SfmlGraph.cpp -o $@ $(shell pkg-config --cflags --libs sfml-graphics 2>/dev/null || echo "-lsfml-graphics -lsfml-window -lsfml-system")
+$(LIB_DIR)/arcade_sfml.so: $(GRAPHICS_SFML_OBJ) lib
+				$(CXX) $(CXXFLAGS) -shared $(GRAPHICS_SFML_OBJ) -o $@ $(shell pkg-config --cflags --libs sfml-graphics 2>/dev/null || echo "-lsfml-graphics -lsfml-window -lsfml-system")
+				@echo "✓ Built: $@"
 
 core:			$(ARCADE)
-				@echo "✓ Core arcade executable built"
 
 games:			lib $(GAMES_SO)
 				@echo "✓ Games libraries built"
@@ -70,11 +70,13 @@ graphicals:		lib $(GRAPHICS_SO)
 				@echo "✓ Graphical libraries built"
 
 clean:
-				$(RM) $(CORE_OBJ)
+				$(RM) $(CORE_OBJ) $(GRAPHICS_NCURSES_OBJ) $(GRAPHICS_SDL2_OBJ) $(GRAPHICS_SFML_OBJ)
+				@echo "✓ Objects cleaned"
 
 fclean:			clean
 				$(RM) $(ARCADE)
 				$(RM) -r $(LIB_DIR)
+				@echo "✓ Full clean completed"
 
 re:				fclean all
 

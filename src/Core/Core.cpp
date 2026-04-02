@@ -13,6 +13,7 @@
 #include "IDisplay.hpp"
 #include "IGame.hpp"
 #include "LibManager.hpp"
+#include "Menu.hpp"
 #include "arcade.hpp"
 
 Core::Core(const std::string &initialDisplayLib)
@@ -20,6 +21,20 @@ Core::Core(const std::string &initialDisplayLib)
     mLibManager.scanDirectory(LIBDIRECTORY);
     loadScores();
     switchDisplay(initialDisplayLib);
+    
+    mGame = std::make_unique<Menu>();
+    auto menu = dynamic_cast<Menu*>(mGame.get());
+    if (menu) {
+        menu->setGameLibs(mLibManager.getGameLibs());
+        menu->setDisplayLibs(mLibManager.getDisplayLibs());
+        std::vector<std::pair<std::string, int>> scores;
+        for (const auto& player : mScores) {
+            scores.push_back({player.name, player.highScore});
+        }
+        menu->setScores(scores);
+        menu->init();
+    }
+    mInMenu = true;
 }
 
 void Core::saveScore()
@@ -83,6 +98,42 @@ void Core::isGameEnded()
     }
 }
 
+void Core::updateMenuTransitions()
+{
+    auto menu = dynamic_cast<Menu*>(mGame.get());
+
+    if (!menu || !menu->wantsToLaunchGame())
+        return;
+    std::string gameLib = menu->getSelectedGame();
+    if (!gameLib.empty())
+        switchGame(gameLib);
+    if (menu->wantsToChangeDisplay()) {
+        std::string displayLib = menu->getSelectedDisplay();
+        if (!displayLib.empty()) {
+            switchDisplay(displayLib);
+        }
+    }
+}
+
+void Core::updateDisplay()
+{
+    mDisplay->clear();
+    mDisplay->draw(mGame->getMap());
+    mDisplay->display();
+}
+
+void Core::updateGameLogic(Input input)
+{
+    if (!mGame)
+        return;
+    mGame->update(input);
+    updateDisplay();
+    if (mInMenu)
+        updateMenuTransitions();
+    else
+        isGameEnded();
+}
+
 int Core::run()
 {
     Input input = Input::NONE;
@@ -90,13 +141,7 @@ int Core::run()
     while (mIsRunning) {
         input = mDisplay->getInput();
         handleInput(input);
-        if (mGame) {
-            mGame->update(input);
-            mDisplay->clear();
-            mDisplay->draw(mGame->getMap());
-            mDisplay->display();
-            isGameEnded();
-        }
+        updateGameLogic(input);
     }
     return EXITSUCCESS;
 }
