@@ -62,6 +62,4 @@ class Menu : public IMenu {
         Section _section = Section::GAMES;
 };
 
-extern "C" IGame* createGame();
-
 #endif /* MENU_HPP */

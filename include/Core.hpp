@@ -35,6 +35,10 @@ class Core {
         void handleInput(Input input);
         void saveScore();
         void loadScores();
+        
+        void updateMenuTransitions();
+        void updateDisplay();
+        void updateGameLogic(Input input);
 
         LibManager mLibManager;
         Player mPlayer;

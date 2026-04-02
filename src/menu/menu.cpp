@@ -18,7 +18,9 @@ void Menu::init()
     mWantsChangeDisplay = false;
 }
 
-void Menu::stop() {}
+void Menu::stop()
+{
+}
 
 int Menu::getScore() const
 {
@@ -52,11 +54,15 @@ void Menu::setScores(const std::vector<std::pair<std::string, int>> &scores)
 
 std::string Menu::getSelectedGame() const
 {
+    if (mGameLibs.empty())
+        return "";
     return mGameLibs[mSelectedGame];
 }
 
 std::string Menu::getSelectedDisplay() const
 {
+    if (mDisplayLibs.empty())
+        return "";
     return mDisplayLibs[mSelectedDisplay];
 }
 
@@ -84,15 +90,22 @@ int Menu::addDisplays(std::vector<Tile> &tiles) const
     std::string prefix;
 
     dispY = 3 + (int)mGameLibs.size() + 1;
+    if (mGameLibs.empty())
+        dispY = 3 + 1 + 1;
     tiles.push_back({0, dispY, TileType::TEXT,
-                     {255, 255, 0, 255}, "-- DISPLAYS --"});
-    for (i = 0; i < (int)mDisplayLibs.size(); i++) {
-        selected = (i == mSelectedDisplay && _section == Section::DISPLAYS);
-        c = selected ? Color{0, 255, 0, 255}
-                     : Color{255, 255, 255, 255};
-        prefix = selected ? "> " : "  ";
-        tiles.push_back({0, dispY + 1 + i, TileType::TEXT,
-                         c, prefix + mDisplayLibs[i]});
+            {255, 255, 0, 255}, "-- DISPLAYS --"});
+    if (mDisplayLibs.empty()) {
+        tiles.push_back({0, dispY + 1, TileType::TEXT,
+            {200, 100, 100, 255}, "No displays available"});
+    } else {
+        for (i = 0; i < (int)mDisplayLibs.size(); i++) {
+            selected = (i == mSelectedDisplay && _section == Section::DISPLAYS);
+            c = selected ? Color{0, 255, 0, 255}
+            : Color{255, 255, 255, 255};
+            prefix = selected ? "> " : "  ";
+            tiles.push_back({0, dispY + 1 + i, TileType::TEXT,
+            c, prefix + mDisplayLibs[i]});
+        }
     }
     return dispY;
 }
@@ -126,11 +139,16 @@ void Menu::addGames(std::vector<Tile> &tiles) const
 
     tiles.push_back({0, 2, TileType::TEXT,
                         {255, 255, 0, 255},  "-- GAMES --"});
-    for (int i = 0; i < (int)mGameLibs.size(); i++) {
-        selected = (i ==mSelectedGame &&_section == Section::GAMES);
-        c = selected ? Color{0, 255, 0, 255} : Color{255, 255, 255, 255};
-        prefix = selected ? "> " : " ";
-        tiles.push_back({0, 3 + i, TileType::TEXT, c, prefix + mGameLibs[i]});
+    if (mGameLibs.empty()) {
+        tiles.push_back({0, 3, TileType::TEXT,
+                        {200, 100, 100, 255}, "No games available"});
+    } else {
+        for (int i = 0; i < (int)mGameLibs.size(); i++) {
+            selected = (i ==mSelectedGame &&_section == Section::GAMES);
+            c = selected ? Color{0, 255, 0, 255} : Color{255, 255, 255, 255};
+            prefix = selected ? "> " : "  ";
+            tiles.push_back({0, 3 + i, TileType::TEXT, c, prefix + mGameLibs[i]});
+        }
     }    
 }
 
@@ -171,22 +189,20 @@ void Menu::addControls(std::vector<Tile> &tiles, int nameY) const
 
 void Menu::handleUp()
 {
-    if (_section == Section::GAMES &&!mGameLibs.empty()) {
-        mSelectedGame = (mSelectedGame - 1 
+    if (_section == Section::GAMES &&!mGameLibs.empty())
+        mSelectedGame = (mSelectedGame - 1
         + mGameLibs.size()) % mGameLibs.size();
-    } else if (_section == Section::DISPLAYS &&!mDisplayLibs.empty()) {
+    else if (_section == Section::DISPLAYS &&!mDisplayLibs.empty())
         mSelectedDisplay = (mSelectedDisplay - 1 + mDisplayLibs.size())
         % mDisplayLibs.size();
-    }
 }
 
 void Menu::handleDown()
 {
-    if (_section == Section::GAMES &&!mGameLibs.empty()) {
+    if (_section == Section::GAMES &&!mGameLibs.empty())
         mSelectedGame = (mSelectedGame + 1) % mGameLibs.size();
-    } else if (_section == Section::DISPLAYS &&!mDisplayLibs.empty()) {
+    else if (_section == Section::DISPLAYS &&!mDisplayLibs.empty())
         mSelectedDisplay = (mSelectedDisplay + 1) % mDisplayLibs.size();
-    }
 }
 
 void Menu::handleSectionSwitch()
@@ -217,10 +233,9 @@ void Menu::handleNextGame()
 
 void Menu::handleSelect()
 {
-    if ((_section == Section::NAME || _section == Section::GAMES) 
-        &&!mLayerName.empty()) {
+    if (_section == Section::NAME
+        || (_section == Section::GAMES && !mGameLibs.empty()))
         mWantsLaunch = true;
-    }
 }
 
 void Menu::handleNameEdit()
@@ -240,7 +255,11 @@ void Menu::update(Input input)
         case Input::RIGHT: handleSectionSwitch(); break;
         case Input::NEXT_LIB: handleNextLib(); break;
         case Input::NEXT_GAME: handleNextGame(); break;
-        case Input::SELECT: handleSelect(); break;
+        case Input::SELECT:
+            if (mLayerName.empty())
+                mLayerName = "Player";
+            handleSelect();
+            break;
         case Input::TOGGLE_SOUND: handleNameEdit(); break;
         default: break;
     }
