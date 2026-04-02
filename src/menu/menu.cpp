@@ -150,7 +150,79 @@ void Menu::addControls(std::vector<Tile> &tiles, int nameY) const
                      "UP/DOWN: navigate  LEFT/RIGHT: switch section  ENTER: launch"});
 }
 
+//UPDATE INPUT
 void Menu::update(Input input)
 {
     _wantsChangeDisplay = false;
+
+    switch (input) {
+        case Input::UP:           handleUp(); break;
+        case Input::DOWN:         handleDown(); break;
+        case Input::LEFT:
+        case Input::RIGHT:        handleSectionSwitch(); break;
+        case Input::NEXT_LIB:     handleNextLib(); break;
+        case Input::NEXT_GAME:    handleNextGame(); break;
+        case Input::SELECT:       handleSelect(); break;
+        case Input::TOGGLE_SOUND: handleNameEdit(); break;
+        default: break;
+    }
+}
+
+void Menu::handleUp()
+{
+    if (_section == Section::GAMES && !_gameLibs.empty()) {
+        _selectedGame = (_slectedGame - 1 
+                        + _gameLibs.size()) % _gameLibs.size();
+    } else if (_section == Section::DISPLAYS && !_displayLibs.empty()) {
+        _selectedDisplay = (_selectedDisplay - 1 + _displayLibs.size())
+                            % _displayLibs.size();
+    }
+}
+
+void Menu::handleDown()
+{
+    if (_section == Section::GAMES && !_gameLibs.empty()) {
+        _selectedGame = (_slectedGame + 1) % _gameLibs.size();
+    } else if (_section == Section::DISPLAYS && !_displayLibs.empty()) {
+        _selectedDisplay = (_selectedDisplay + 1) % _displayLibs.size();
+    }
+}
+
+void Menu::hnadleSectionSwitch()
+{
+    if (_section == Section::GAMES)
+        _section = Section::DISPLAYS;
+    else if (_section == Section::DISPLAYS)
+        _section = Section::NAME;
+    else
+        _section = Section::GAMES;
+}
+
+void Menu::handleNextLib()
+{
+    if (_displayLibs.empty())
+        return;
+    _selectedDisplay = (_selectedDisplay + 1) % _displayLibs.size();
+    _wantsCahngeDisplay = true;
+}
+
+void Menu::handleNextGame()
+{
+    if (_gameLibs.empty())
+        return;
+    _selectedGame = (_selectedGame + 1) % _gameLibs.size();
+}
+
+void Menu::handleSelect()
+{
+    if ((_section == Section::NAME || _section == Section::GAMES) 
+        && !_playerName.empty()) {
+            _wantsLaunch = true;
+        }
+}
+
+void Menu::handleNameEdit()
+{
+    if (_section == Section::NAME && !_playerName.empty())
+        _playerName.pop_back();
 }
