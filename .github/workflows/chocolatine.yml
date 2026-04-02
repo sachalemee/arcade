@@ -1,0 +1,55 @@
+name: arcade
+
+on:
+    push:
+        branches-ignore:
+            - "ga-ignore-*"
+    pull_request:
+        types: opened
+        branches-ignore:
+            - "ga-ignore-*"
+
+env:
+    EXECUTABLES: "arcade"
+
+jobs:
+    check_program_compilation:
+        runs-on: ubuntu-latest
+        steps:
+           - name: Checkout repository
+             uses: actions/checkout@v4
+             with:
+                fetch-depth: 1
+           - name: Install dependencies
+             run: |
+                   apt-get update
+                   apt-get install -y libncurses-dev libsdl2-dev libsfml-dev
+           - name: Launch the make command with a timeout 
+             timeout-minutes: 2
+             run: make
+           - name: Check core executable
+             run: |
+                   if [ ! -f "arcade" ]; then
+                       echo "::error file=arcade,line=1,title=Executable not found::arcade executable not found"
+                       exit 1
+                   fi
+                   if [ ! -x "arcade" ]; then
+                       echo "::error file=arcade,line=1,title=Executable not executable::arcade executable is not executable"
+                       exit 1
+                   fi
+           - name: Check graphics libraries
+             run: |
+                   for lib in arcade_ncurses.so arcade_sdl2.so arcade_sfml.so; do
+                       if [ ! -f "lib/$lib" ]; then
+                           echo "::error file=lib/$lib,line=1,title=Library not found::$lib not found in lib/"
+                           exit 1
+                       fi
+                   done
+           - name: Launch the make clean command
+             run: make clean
+           - name: Check that files are removed after clean
+             run: |
+                   if [ -f "arcade" ]; then
+                       echo "::error file=Makefile,line=1,title=Clean failed::arcade executable not removed by make clean"
+                       exit 1
+                   fi
