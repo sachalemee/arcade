@@ -6,62 +6,97 @@
 */
 
 #include "IMenu.hpp"
+#include "Menu.hpp"
 
 void Menu::init()
 {
-    _selectedGame = 0;
-    _selectedDisplay = 0;
+    mSelectedGame = 0;
+    mSelectedDisplay = 0;
     _section = Section::GAMES;
-    _playerName = "";
-    _wantsLaunch = false;
-    _wantsChangeDisplay = false;
+    mLayerName = "";
+    mWantsLaunch = false;
+    mWantsChangeDisplay = false;
 }
 
 void Menu::stop() {}
 
-//SETTERS
-void setGameLibs(const std::vector<std::string>& libs)
+int Menu::getScore() const
 {
-    _gameLibs = libs;
+    return 0;
 }
 
-void setDisplayLibs(const std::vector<std::string>& libs)
+bool Menu::isOver() const
 {
-    _displayLibs = libs;
+    return mWantsLaunch;
 }
 
-void setScores(const std::vector<std::pair<std::string, int>>& scores)
+std::string Menu::getName() const
 {
-    _scores = scores;
+    return "Menu";
 }
 
-// GETTERS
-std::string getSelectedGame() const
+void Menu::setGameLibs(const std::vector<std::string> &libs)
 {
-    return _gamesLibs[_selectedGame];
+    mGameLibs = libs;
 }
 
-std::string getSelectedDisplay() const
+void Menu::setDisplayLibs(const std::vector<std::string> &libs)
 {
-    return _displayLibs[_selectedDisplkay];
+    mDisplayLibs = libs;
 }
 
-std::string getPlayerName() const
+void Menu::setScores(const std::vector<std::pair<std::string, int>> &scores)
 {
-    return _playerName;
+    mScores = scores;
 }
 
-bool wantsToLaunchGame() const
+std::string Menu::getSelectedGame() const
 {
-    return _wantsLaunch;
+    return mGameLibs[mSelectedGame];
 }
 
-bool wantsToChangeDisplay() const
+std::string Menu::getSelectedDisplay() const
 {
-    return _WantsChangeDisplay;
+    return mDisplayLibs[mSelectedDisplay];
 }
 
-//MAP GETTERS
+std::string Menu::getPlayerName() const
+{
+    return mLayerName;
+}
+
+bool Menu::wantsToLaunchGame() const
+{
+    return mWantsLaunch;
+}
+
+bool Menu::wantsToChangeDisplay() const
+{
+    return mWantsChangeDisplay;
+}
+
+int Menu::addDisplays(std::vector<Tile> &tiles) const
+{
+    int dispY = 0;
+    int i = 0;
+    bool selected = false;
+    Color c;
+    std::string prefix;
+
+    dispY = 3 + (int)mGameLibs.size() + 1;
+    tiles.push_back({0, dispY, TileType::TEXT,
+                     {255, 255, 0, 255}, "-- DISPLAYS --"});
+    for (i = 0; i < (int)mDisplayLibs.size(); i++) {
+        selected = (i == mSelectedDisplay && _section == Section::DISPLAYS);
+        c = selected ? Color{0, 255, 0, 255}
+                     : Color{255, 255, 255, 255};
+        prefix = selected ? "> " : "  ";
+        tiles.push_back({0, dispY + 1 + i, TileType::TEXT,
+                         c, prefix + mDisplayLibs[i]});
+    }
+    return dispY;
+}
+
 std::vector<Tile> Menu::getMap() const
 {
     std::vector<Tile> tiles;
@@ -77,10 +112,10 @@ std::vector<Tile> Menu::getMap() const
     return tiles;
 }
 
-void Meny::addTitle(std::vector<Tile> &tiles) const
+void Menu::addTitle(std::vector<Tile> &tiles) const
 {
     tiles.push_back({20, 0, TileType::TEXT,
-                        {255, 255, 0, 255}, "=== ARCADE ==="});
+        {255, 255, 0, 255}, "--- ARCADE ---"});
 }
 
 void Menu::addGames(std::vector<Tile> &tiles) const
@@ -91,38 +126,22 @@ void Menu::addGames(std::vector<Tile> &tiles) const
 
     tiles.push_back({0, 2, TileType::TEXT,
                         {255, 255, 0, 255},  "-- GAMES --"});
-    for (int i = 0; i < (int)_gameLibs.size(); i++) {
-        selected = (i ==_selectdGame && _section == Section::GAMES);
+    for (int i = 0; i < (int)mGameLibs.size(); i++) {
+        selected = (i ==mSelectedGame &&_section == Section::GAMES);
         c = selected ? Color{0, 255, 0, 255} : Color{255, 255, 255, 255};
         prefix = selected ? "> " : " ";
-        tiles.push_back({0, 3 + i, TileType::TEXT, c, prefix + _gameLibs[i]});
+        tiles.push_back({0, 3 + i, TileType::TEXT, c, prefix + mGameLibs[i]});
     }    
 }
 
-int Menu::addDisplays(std::vector<Tile> &tiles) const
-{
-    std::string prefix;
-    bool selected;
-    Color c;
-
-    tiles.push_back({0, 2, TileType::TEXT,
-                        {255, 255, 0, 255},  "-- GAMES --"});
-    for (int i = 0; i < (int)_displayLibs.size(); i++) {
-        selected = (i ==_selectDisplay && _section == Section::DISPLAYS);
-        c = selected ? Color{0, 255, 0, 255} : Color{255, 255, 255, 255};
-        prefix = selected ? "> " : " ";
-        tiles.push_back({0, 3 + i, TileType::TEXT, c, prefix + _displayLibs[i]});
-    }    
-}
-
-void Menu::addScores(std::vector<Tiles> &tiles) const
+void Menu::addScores(std::vector<Tile> &tiles) const
 {
     std::string line;
 
     tiles.push_back({40, 2, TileType::TEXT,
-                        {255, 255, 0, 255}, "-- SCORES --"});
-    for (int i = 0; i < (int)_scores.size(); i++) {
-        line = _scores[i].first + " : " + std::to_string(_scores[i].second);
+        {255, 255, 0, 255}, "-- SCORES --"});
+    for (int i = 0; i < (int)mScores.size(); i++) {
+        line = mScores[i].first + " : " + std::to_string(mScores[i].second);
         tiles.push_back({40, 3 + i, TileType::TEXT,
                             {255, 255, 255, 255}, line});
     }
@@ -133,62 +152,44 @@ int Menu::addPlayerName(std::vector<Tile> &tiles, int dispY) const
     int nameY;
     Color nameColor;
 
-    nameY = dispY + (int)_displayLibs.size() + 2;
+    nameY = dispY + (int)mDisplayLibs.size() + 2;
     tiles.push_back({0, nameY, TileType::TEXT,
-                        {255, 255, 0, 255}, "-- PLAYER NAME --"});
-    nameColor = (_section == section::NAME)
-                ? Color{0 ,255, 255, 255} : Color{255, 255, 255, 255};
+        {255, 255, 0, 255}, "-- PLAYER NAME --"});
+    nameColor = (_section == Section::NAME)
+        ? Color{0 ,255, 255, 255} : Color{255, 255, 255, 255};
     tiles.push_back({0, nameY + 1, TileType::TEXT,
-                        nameColor, "> " + _playerName + "_"});
+                        nameColor, "> " + mLayerName + "_"});
     return nameY;
 }
 
 void Menu::addControls(std::vector<Tile> &tiles, int nameY) const
 {
     tiles.push_back({0, nameY + 3, TileType::TEXT,
-                     {150, 150, 150, 255},
-                     "UP/DOWN: navigate  LEFT/RIGHT: switch section  ENTER: launch"});
-}
-
-//UPDATE INPUT
-void Menu::update(Input input)
-{
-    _wantsChangeDisplay = false;
-
-    switch (input) {
-        case Input::UP:           handleUp(); break;
-        case Input::DOWN:         handleDown(); break;
-        case Input::LEFT:
-        case Input::RIGHT:        handleSectionSwitch(); break;
-        case Input::NEXT_LIB:     handleNextLib(); break;
-        case Input::NEXT_GAME:    handleNextGame(); break;
-        case Input::SELECT:       handleSelect(); break;
-        case Input::TOGGLE_SOUND: handleNameEdit(); break;
-        default: break;
-    }
+        {150, 150, 150, 255},
+        "UP/DOWN: navigate  LEFT/RIGHT: switch section  ENTER: launch"});
 }
 
 void Menu::handleUp()
 {
-    if (_section == Section::GAMES && !_gameLibs.empty()) {
-        _selectedGame = (_slectedGame - 1 
-                        + _gameLibs.size()) % _gameLibs.size();
-    } else if (_section == Section::DISPLAYS && !_displayLibs.empty()) {
-        _selectedDisplay = (_selectedDisplay - 1 + _displayLibs.size())
-                            % _displayLibs.size();
+    if (_section == Section::GAMES &&!mGameLibs.empty()) {
+        mSelectedGame = (mSelectedGame - 1 
+        + mGameLibs.size()) % mGameLibs.size();
+    } else if (_section == Section::DISPLAYS &&!mDisplayLibs.empty()) {
+        mSelectedDisplay = (mSelectedDisplay - 1 + mDisplayLibs.size())
+        % mDisplayLibs.size();
     }
 }
 
 void Menu::handleDown()
 {
-    if (_section == Section::GAMES && !_gameLibs.empty()) {
-        _selectedGame = (_slectedGame + 1) % _gameLibs.size();
-    } else if (_section == Section::DISPLAYS && !_displayLibs.empty()) {
-        _selectedDisplay = (_selectedDisplay + 1) % _displayLibs.size();
+    if (_section == Section::GAMES &&!mGameLibs.empty()) {
+        mSelectedGame = (mSelectedGame + 1) % mGameLibs.size();
+    } else if (_section == Section::DISPLAYS &&!mDisplayLibs.empty()) {
+        mSelectedDisplay = (mSelectedDisplay + 1) % mDisplayLibs.size();
     }
 }
 
-void Menu::hnadleSectionSwitch()
+void Menu::handleSectionSwitch()
 {
     if (_section == Section::GAMES)
         _section = Section::DISPLAYS;
@@ -198,31 +199,49 @@ void Menu::hnadleSectionSwitch()
         _section = Section::GAMES;
 }
 
+
 void Menu::handleNextLib()
 {
-    if (_displayLibs.empty())
+    if (mDisplayLibs.empty())
         return;
-    _selectedDisplay = (_selectedDisplay + 1) % _displayLibs.size();
-    _wantsCahngeDisplay = true;
+    mSelectedDisplay = (mSelectedDisplay + 1) % mDisplayLibs.size();
+    mWantsChangeDisplay = true;
 }
 
 void Menu::handleNextGame()
 {
-    if (_gameLibs.empty())
+    if (mGameLibs.empty())
         return;
-    _selectedGame = (_selectedGame + 1) % _gameLibs.size();
+    mSelectedGame = (mSelectedGame + 1) % mGameLibs.size();
 }
 
 void Menu::handleSelect()
 {
     if ((_section == Section::NAME || _section == Section::GAMES) 
-        && !_playerName.empty()) {
-            _wantsLaunch = true;
-        }
+        &&!mLayerName.empty()) {
+        mWantsLaunch = true;
+    }
 }
 
 void Menu::handleNameEdit()
 {
-    if (_section == Section::NAME && !_playerName.empty())
-        _playerName.pop_back();
+    if (_section == Section::NAME &&!mLayerName.empty())
+        mLayerName.pop_back();
+}
+
+void Menu::update(Input input)
+{
+    mWantsChangeDisplay = false;
+
+    switch (input) {
+        case Input::UP: handleUp(); break;
+        case Input::DOWN: handleDown(); break;
+        case Input::LEFT:
+        case Input::RIGHT: handleSectionSwitch(); break;
+        case Input::NEXT_LIB: handleNextLib(); break;
+        case Input::NEXT_GAME: handleNextGame(); break;
+        case Input::SELECT: handleSelect(); break;
+        case Input::TOGGLE_SOUND: handleNameEdit(); break;
+        default: break;
+    }
 }
