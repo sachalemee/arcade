@@ -33,7 +33,7 @@ jobs:
 
       - name: Build librairies
         timeout-minutes: 2
-        run: make graphics
+        run: make graphicals
 
       - name: Clean build
         run: make clean
