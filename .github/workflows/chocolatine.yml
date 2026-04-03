@@ -12,6 +12,9 @@ on:
 env:
   EXECUTABLES: arcade
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  ARCARDE_NUCURSES: lib/arcade_ncurses.so
+  ARCARDE_SFML: lib/arcade_sfml.so
+  ARCARDE_SDL2: lib/arcade_sdl2.so
 
 jobs:
   check_program_compilation:
@@ -47,5 +50,5 @@ jobs:
       - name: Run executables
         run: |
           for exec in $EXECUTABLES; do
-            ./$exec
+            ./$exec $ARCARDE_NUCURSES
           done
