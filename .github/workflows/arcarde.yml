@@ -1,3 +1,10 @@
+##
+## EPITECH PROJECT, 2026
+## arcade
+## File description:
+## arcarde.yml
+##
+
 name: arcade
 
 on:
@@ -33,7 +40,7 @@ jobs:
 
       - name: Build librairies
         timeout-minutes: 2
-        run: make graphics
+        run: make graphicals
 
       - name: Clean build
         run: make clean
