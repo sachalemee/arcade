@@ -28,6 +28,7 @@ class Core {
         Core(const std::string &initialDisplayLib);
         ~Core() = default;
         int run();
+        void setRunning(bool running) { mIsRunning = running; }
 
     private:
         void isGameEnded();

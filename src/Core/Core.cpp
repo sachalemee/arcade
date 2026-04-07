@@ -1,4 +1,6 @@
 #include <cstdio>
+#include <cstdlib>
+#include <csignal>
 #include <dlfcn.h>
 #include <memory>
 #include <unistd.h>
@@ -10,8 +12,18 @@
 #include "LibManager.hpp"
 #include "arcade.hpp"
 
+static Core *g_coreInstance = nullptr;
+
+void signalHandler(int signal)
+{
+    if (signal == SIGINT && g_coreInstance)
+        g_coreInstance->setRunning(false);
+}
+
 Core::Core(const std::string &initialDisplayLib)
 {
+    g_coreInstance = this;
+    signal(SIGINT, signalHandler);
     mLibManager.scanDirectory(LIBDIRECTORY);
     loadScores();
     switchDisplay(initialDisplayLib);

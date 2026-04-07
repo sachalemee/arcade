@@ -195,7 +195,6 @@ void Menu::handleUp()
     } else if (_section == Section::DISPLAYS &&!mDisplayLibs.empty()) {
         mSelectedDisplay = (mSelectedDisplay - 1 + mDisplayLibs.size())
         % mDisplayLibs.size();
-        mWantsChangeDisplay = true;
     }
 }
 
@@ -205,7 +204,6 @@ void Menu::handleDown()
         mSelectedGame = (mSelectedGame + 1) % mGameLibs.size();
     } else if (_section == Section::DISPLAYS &&!mDisplayLibs.empty()) {
         mSelectedDisplay = (mSelectedDisplay + 1) % mDisplayLibs.size();
-        mWantsChangeDisplay = true;
     }
 }
 
