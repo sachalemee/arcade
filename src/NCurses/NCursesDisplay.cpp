@@ -90,7 +90,7 @@ void NCursesDisplay::display()
 
 void NCursesDisplay::clear()
 {
-    ::clear();
+    ::erase();
 }
 
 
