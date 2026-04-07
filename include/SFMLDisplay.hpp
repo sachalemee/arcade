@@ -9,6 +9,10 @@
     #define SFMLDISPLAY_HPP
 
 #include "IDisplay.hpp"
+#include <SFML/Graphics.hpp>
+
+#define PATH_FONT "./assets/MericaFuturistBlackItalic_PERSONAL_USE_ONLY.otf"
+const int TILE_SIZE = 16;
 
 class SFMLDisplay : public IDisplay {
     public:
@@ -24,6 +28,9 @@ class SFMLDisplay : public IDisplay {
         Input getInput() override;
 
     private:
+        sf::RenderWindow _window;
+        sf::Font    _font;
+        sf::Color toSFMLColor(const Color &c) const;
 };
 
 #endif /* SFMLDISPLAY_HPP */
