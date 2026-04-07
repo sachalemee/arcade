@@ -189,20 +189,24 @@ void Menu::addControls(std::vector<Tile> &tiles, int nameY) const
 
 void Menu::handleUp()
 {
-    if (_section == Section::GAMES &&!mGameLibs.empty())
+    if (_section == Section::GAMES &&!mGameLibs.empty()) {
         mSelectedGame = (mSelectedGame - 1
         + mGameLibs.size()) % mGameLibs.size();
-    else if (_section == Section::DISPLAYS &&!mDisplayLibs.empty())
+    } else if (_section == Section::DISPLAYS &&!mDisplayLibs.empty()) {
         mSelectedDisplay = (mSelectedDisplay - 1 + mDisplayLibs.size())
         % mDisplayLibs.size();
+        mWantsChangeDisplay = true;
+    }
 }
 
 void Menu::handleDown()
 {
-    if (_section == Section::GAMES &&!mGameLibs.empty())
+    if (_section == Section::GAMES &&!mGameLibs.empty()) {
         mSelectedGame = (mSelectedGame + 1) % mGameLibs.size();
-    else if (_section == Section::DISPLAYS &&!mDisplayLibs.empty())
+    } else if (_section == Section::DISPLAYS &&!mDisplayLibs.empty()) {
         mSelectedDisplay = (mSelectedDisplay + 1) % mDisplayLibs.size();
+        mWantsChangeDisplay = true;
+    }
 }
 
 void Menu::handleSectionSwitch()
@@ -233,9 +237,13 @@ void Menu::handleNextGame()
 
 void Menu::handleSelect()
 {
-    if (_section == Section::NAME
-        || (_section == Section::GAMES && !mGameLibs.empty()))
+    if (_section == Section::DISPLAYS) {
+        // On peut switcher de display avec SELECT
+        mWantsChangeDisplay = true;
+    } else if (_section == Section::NAME
+        || (_section == Section::GAMES && !mGameLibs.empty())) {
         mWantsLaunch = true;
+    }
 }
 
 void Menu::handleNameEdit()
@@ -263,4 +271,14 @@ void Menu::update(Input input)
         case Input::TOGGLE_SOUND: handleNameEdit(); break;
         default: break;
     }
+}
+
+extern "C" IGame *createGame()
+{
+    return new Menu();
+}
+
+extern "C" IMenu *createMenu()
+{
+    return new Menu();
 }

@@ -6,15 +6,14 @@
 ##
 
 CXX				?= clang++
-CXXFLAGS		+= -Wall -Wextra -fPIC -fno-gnu-unique
+CXXFLAGS		+= -Wall -Wextra -g3 -fPIC -fno-gnu-unique
 CPPFLAGS		+= -I include/
 LDFLAGS			+= -ldl
 
 CORE_SRC		=	src/main.cpp \
 					src/Core/Core.cpp \
 					src/ErrorHandling/errorHandling.cpp \
-					src/LibManager/LibManager.cpp \
-					src/menu/menu.cpp
+					src/LibManager/LibManager.cpp
 
 CORE_OBJ		=	$(CORE_SRC:.cpp=.o)
 
@@ -36,8 +35,12 @@ GRAPHICS_SO		=	$(LIB_DIR)/arcade_ncurses.so \
 
 GAMES_SO		=	
 
+MENU_SRC 		= 	src/menu/menu.cpp
+MENU_OBJ 		= 	$(MENU_SRC:.cpp=.o)
 
-all:			$(ARCADE) games graphicals
+MENU_SO			=	$(LIB_DIR)/arcade_menu.so
+
+all:			$(ARCADE) graphicals games
 
 lib:
 				mkdir -p $(LIB_DIR)
@@ -61,16 +64,21 @@ $(LIB_DIR)/arcade_sfml.so: $(GRAPHICS_SFML_OBJ) lib
 				$(CXX) $(CXXFLAGS) -shared $(GRAPHICS_SFML_OBJ) -o $@ $(shell pkg-config --cflags --libs sfml-graphics 2>/dev/null || echo "-lsfml-graphics -lsfml-window -lsfml-system")
 				@echo "✓ Built: $@"
 
-core:			$(ARCADE)
+$(MENU_SO): $(MENU_OBJ) lib
+				$(CXX) $(CXXFLAGS) -shared $(MENU_OBJ) -o $@
+				@echo "✓ Built: $@"
 
-games:			lib $(GAMES_SO)
-				@echo "✓ Games libraries built"
+core:			$(ARCADE)
+				@echo "✓ Core executable built"
 
 graphicals:		lib $(GRAPHICS_SO)
 				@echo "✓ Graphical libraries built"
 
+games:			lib $(GAMES_SO) $(MENU_SO)
+				@echo "✓ Games and menu libraries built"
+
 clean:
-				$(RM) $(CORE_OBJ) $(GRAPHICS_NCURSES_OBJ) $(GRAPHICS_SDL2_OBJ) $(GRAPHICS_SFML_OBJ)
+				$(RM) $(CORE_OBJ) $(MENU_OBJ) $(GRAPHICS_NCURSES_OBJ) $(GRAPHICS_SDL2_OBJ) $(GRAPHICS_SFML_OBJ)
 				@echo "✓ Objects cleaned"
 
 fclean:			clean
