@@ -6,11 +6,11 @@
 */
 
 #ifndef IMENU_HPP
-#define IMENU_HPP
+    #define IMENU_HPP
 
-#include "IGame.hpp"
-#include <string>
-#include <vector>
+    #include <string>
+    #include <vector>
+    #include "IGame.hpp"
 
 class IMenu : public IGame {
 public:
@@ -31,4 +31,4 @@ public:
     virtual bool wantsToChangeDisplay() const = 0;
 };
 
-#endif
+#endif /* IMENU_HPP */
