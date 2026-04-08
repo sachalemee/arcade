@@ -73,28 +73,56 @@ void SFMLDisplay::close()
 
 Input SFMLDisplay::getInput()
 {
+    Input result = Input::NONE;
     sf::Event event;
     while (_window.pollEvent(event)) {
         if (event.type == sf::Event::Closed)
-            return Input::EXIT;
+            result = Input::EXIT;
         if (event.type == sf::Event::KeyPressed) {
+            Input key = Input::NONE;
             switch (event.key.code) {
-                case sf::Keyboard::Up:     return Input::UP;
-                case sf::Keyboard::Down:   return Input::DOWN;
-                case sf::Keyboard::Left:   return Input::LEFT;
-                case sf::Keyboard::Right:  return Input::RIGHT;
-                case sf::Keyboard::N:      return Input::NEXT_GAME;
-                case sf::Keyboard::L:      return Input::NEXT_LIB;
-                case sf::Keyboard::R:      return Input::RESTART;
-                case sf::Keyboard::Escape: return Input::MENU;
-                case sf::Keyboard::E:      return Input::EXIT;
-                case sf::Keyboard::Enter:  return Input::SELECT;
-                case sf::Keyboard::Space:  return Input::TOGGLE_SOUND;
+                case sf::Keyboard::Up:     key = Input::UP; break;
+                case sf::Keyboard::Down:   key = Input::DOWN; break;
+                case sf::Keyboard::Left:   key = Input::LEFT; break;
+                case sf::Keyboard::Right:  key = Input::RIGHT; break;
+                case sf::Keyboard::N:      key = Input::NEXT_GAME; break;
+                case sf::Keyboard::L:      key = Input::NEXT_LIB; break;
+                case sf::Keyboard::R:      key = Input::RESTART; break;
+                case sf::Keyboard::Escape: key = Input::MENU; break;
+                case sf::Keyboard::E:      key = Input::EXIT; break;
+                case sf::Keyboard::Enter:  key = Input::SELECT; break;
+                case sf::Keyboard::Space:  key = Input::TOGGLE_SOUND; break;
                 default: break;
+            }
+            if (key != Input::NONE && result == Input::NONE)
+                result = key;
+        }
+        if (event.type == sf::Event::MouseButtonPressed) {
+            int button = 0;
+            if (event.mouseButton.button == sf::Mouse::Left)
+                button = 1;
+            else if (event.mouseButton.button == sf::Mouse::Right)
+                button = 2;
+            if (button != 0) {
+                int x = event.mouseButton.x / TILE_SIZE;
+                int y = event.mouseButton.y / TILE_SIZE;
+                _mouseClicks.push({x, y, button});
             }
         }
     }
-    return Input::NONE;
+    return result;
+}
+
+bool SFMLDisplay::getMouseClick(int &x, int &y, int &button)
+{
+    if (_mouseClicks.empty())
+        return false;
+    MouseClick click = _mouseClicks.front();
+    _mouseClicks.pop();
+    x = click.x;
+    y = click.y;
+    button = click.button;
+    return true;
 }
 
 void SFMLDisplay::init(int width, int height, const std::string &title)
