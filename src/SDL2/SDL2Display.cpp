@@ -10,18 +10,21 @@
 
 SDL_Color SDL2Display::toSDLColor(const Color &c) const
 {
-    return SDL_Color{c.r, c.g, c.b, C.a};
+    return SDL_Color{c.r, c.g, c.b, c.a};
 }
 
 void SDL2Display::init(int width, int height, const std::string &title)
 {
-    if (DSL_Init(DSL_INIT_VIDEO) < 0)
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
         exit(84);
     if (TTF_Init() < 0)
         exit(84);
-    _window = SDL_CreateWindow(SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED, width, heigth, SDL_WINDW_SHOWN)
+    _window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED,
+            SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
     if (!_window)
+        exit(84);
+    _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
+    if (!_renderer)
         exit(84);
     _font = TTF_OpenFont(PATH_FONT, CHAR_SIZE);
     if (!_font)
@@ -59,7 +62,6 @@ void SDL2Display::drawText(const Tile &tile, const SDL_Color &c)
 {
     SDL_Surface* surface = nullptr;
     SDL_Texture* texture = nullptr;
-    SDL_Rect dst;
     int w;
     int h;
 
@@ -69,9 +71,9 @@ void SDL2Display::drawText(const Tile &tile, const SDL_Color &c)
     texture = SDL_CreateTextureFromSurface(_renderer, surface);
     SDL_FreeSurface(surface);
     if (!texture)
-        reeturn;
+        return;
     SDL_QueryTexture(texture, nullptr, nullptr, &w, &h);
-    dst = {tile.c * SDL_TILE_SIZE, tile.y * SDL_TILE_SIZE, w, h};
+    SDL_Rect dst = {tile.x * SDL_TILE_SIZE, tile.y * SDL_TILE_SIZE, w, h};
     SDL_RenderCopy(_renderer, texture, nullptr, &dst);
     SDL_DestroyTexture(texture);
 }
@@ -122,8 +124,8 @@ void SDL2Display::close()
         SDL_DestroyRenderer(_renderer);
     if (_window)
         SDL_DestroyWindow(_window);
-    TTF_QUIT;
-    SDL_QUIT;
+    TTF_Quit();
+    SDL_Quit();
 }
 
 extern "C" {

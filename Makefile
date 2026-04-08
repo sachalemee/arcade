@@ -57,7 +57,7 @@ $(LIB_DIR)/arcade_ncurses.so: $(GRAPHICS_NCURSES_OBJ) lib
 				@echo "✓ Built: $@"
 
 $(LIB_DIR)/arcade_sdl2.so: $(GRAPHICS_SDL2_OBJ) lib
-				$(CXX) $(CXXFLAGS) -shared $(GRAPHICS_SDL2_OBJ) -o $@ $(shell pkg-config --cflags --libs sdl2 2>/dev/null || echo "-lSDL2")
+				$(CXX) $(CXXFLAGS) -shared $(GRAPHICS_SDL2_OBJ) -o $@ $(shell pkg-config --cflags --libs sdl2 2>/dev/null || echo "-lSDL2") -lSDL2_ttf
 				@echo "✓ Built: $@"
 
 $(LIB_DIR)/arcade_sfml.so: $(GRAPHICS_SFML_OBJ) lib

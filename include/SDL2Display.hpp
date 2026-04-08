@@ -9,9 +9,12 @@
     #define SDL2DISPLAY_HPP
 
 #include "IDisplay.hpp"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
-const std::string PATH_FONT = "./assets/MericaFuturistBlackItalic_PERSONAL_USE_ONLY.otf";
+const char* PATH_FONT = "./assets/MericaFuturistBlackItalic_PERSONAL_USE_ONLY.otf";
 const int CHAR_SIZE = 14;
+const int SDL_TILE_SIZE = 16;
 
 class SDL2Display : public IDisplay {
     public:
