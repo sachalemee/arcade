@@ -210,12 +210,13 @@ void Menu::addGames(std::vector<Tile> &tiles) const
 void Menu::addScores(std::vector<Tile> &tiles) const
 {
     std::string line;
+    const int scoreX = 18;
 
-    tiles.push_back({40, 2, TileType::TEXT,
+    tiles.push_back({scoreX, 2, TileType::TEXT,
         {255, 255, 0, 255}, "-- SCORES --"});
     for (int i = 0; i < (int)mScores.size(); i++) {
         line = mScores[i].first + " : " + std::to_string(mScores[i].second);
-        tiles.push_back({40, 3 + i, TileType::TEXT,
+        tiles.push_back({scoreX, 3 + i, TileType::TEXT,
                             {255, 255, 255, 255}, line});
     }
 }
