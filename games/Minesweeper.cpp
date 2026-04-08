@@ -104,6 +104,20 @@ public:
         }
     }
 
+    void onMouseClick(int x, int y, int button) override
+    {
+        if (gameOver || won)
+            return;
+        int gridX = x - kOffsetX;
+        int gridY = y - kOffsetY;
+        if (gridX < 0 || gridX >= width || gridY < 0 || gridY >= height)
+            return;
+        if (button == 1)
+            revealCell(gridX, gridY);
+        else if (button == 2)
+            toggleFlag(gridX, gridY);
+    }
+
     void stop() override
     {
         gameOver = true;
@@ -134,7 +148,7 @@ public:
         hud << "Mines: " << (numMines - flaggedCount) << " | Time: " << elapsedSeconds << "s";
         tiles.push_back({offsetX, 0, TileType::TEXT, hudColor, hud.str()});
         tiles.push_back({offsetX, offsetY + height + 1, TileType::TEXT, hintColor,
-            "ARROWS: Move | ENTER: Reveal | SPACE: Flag | R: Restart | E: Quit"});
+            "ARROWS: Move | MOUSE: L=Reveal R=Flag | R: Restart | E: Quit"});
 
         for (int x = 0; x < width; x++) {
             tiles.push_back({offsetX + x, offsetY - 1, TileType::EMPTY, borderColor, "-"});
