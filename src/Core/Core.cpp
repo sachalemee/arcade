@@ -87,7 +87,7 @@ void Core::saveScore()
         return;
     for (const auto &entry : mScores)
         out << entry.name << "\t" << entry.highScore << "\n";
-    mLastSaveMessage = "Sauvegarde OK";
+    mLastSaveMessage = "save OK";
 }
 
 void Core::loadScores()
