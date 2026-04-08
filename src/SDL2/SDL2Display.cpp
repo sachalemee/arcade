@@ -35,6 +35,7 @@ Input SDL2Display::getInput()
 
 void SDL2Display::draw(const std::vector<Tile> &tiles)
 {
+    (void)tiles;
 }
 
 void SDL2Display::display()
@@ -52,6 +53,8 @@ void SDL2Display::close()
 
 void SDL2Display::init(int width, int height, const std::string &/* title */)
 {
+    (void)width;
+    (void)height;
 }
 
 extern "C" {

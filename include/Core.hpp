@@ -14,6 +14,7 @@
     #include "DLLoader.hpp"
     #include "IDisplay.hpp"
     #include "IGame.hpp"
+    #include "IMenu.hpp"
     #include "LibManager.hpp"
 
 struct Player {
@@ -27,6 +28,7 @@ class Core {
         Core(const std::string &initialDisplayLib);
         ~Core() = default;
         int run();
+        void setRunning(bool running) { mIsRunning = running; }
 
     private:
         void isGameEnded();
@@ -35,6 +37,7 @@ class Core {
         void handleInput(Input input);
         void saveScore();
         void loadScores();
+        void goToMenu();
         
         void updateMenuTransitions();
         void updateDisplay();
@@ -49,6 +52,9 @@ class Core {
 
         std::unique_ptr<DLLoader<IGame>> mGameLoader;
         std::unique_ptr<IGame> mGame;
+
+        std::unique_ptr<DLLoader<IMenu>> mMenuLoader;
+        std::unique_ptr<IMenu> mMenu;
 
         bool mIsRunning = true;
         bool mInMenu = true;

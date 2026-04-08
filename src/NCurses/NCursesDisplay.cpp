@@ -90,7 +90,7 @@ void NCursesDisplay::display()
 
 void NCursesDisplay::clear()
 {
-    ::clear();
+    ::erase();
 }
 
 
@@ -101,6 +101,8 @@ void NCursesDisplay::close()
 
 void NCursesDisplay::init(int width, int height, const std::string &/* title */)
 {
+    (void)width;
+    (void)height;
     initscr();
     cbreak();
     noecho();
