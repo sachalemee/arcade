@@ -36,6 +36,14 @@ Input NCursesDisplay::getInput()
     return Input::NONE;
 }
 
+bool NCursesDisplay::getMouseClick(int &x, int &y, int &button)
+{
+    (void)x;
+    (void)y;
+    (void)button;
+    return false;
+}
+
 int NCursesDisplay::getColorPair(const Color &c)
 {
     int key = (c.r << 16) | (c.g << 8) | (c.b << 4);
