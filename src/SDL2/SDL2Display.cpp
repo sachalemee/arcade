@@ -56,29 +56,57 @@ void SDL2Display::init(int width, int height, const std::string &title)
 
 Input SDL2Display::getInput()
 {
+    Input result = Input::NONE;
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT)
-            return Input::EXIT;
+            result = Input::EXIT;
 
         if (event.type == SDL_KEYDOWN) {
+            Input key = Input::NONE;
             switch (event.key.keysym.sym) {
-                case SDLK_UP:     return Input::UP;
-                case SDLK_DOWN:   return Input::DOWN;
-                case SDLK_LEFT:   return Input::LEFT;
-                case SDLK_RIGHT:  return Input::RIGHT;
-                case SDLK_n:      return Input::NEXT_GAME;
-                case SDLK_l:      return Input::NEXT_LIB;
-                case SDLK_r:      return Input::RESTART;
-                case SDLK_ESCAPE: return Input::MENU;
-                case SDLK_e:      return Input::EXIT;
-                case SDLK_RETURN: return Input::SELECT;
-                case SDLK_SPACE:  return Input::TOGGLE_SOUND;
+                case SDLK_UP:     key = Input::UP; break;
+                case SDLK_DOWN:   key = Input::DOWN; break;
+                case SDLK_LEFT:   key = Input::LEFT; break;
+                case SDLK_RIGHT:  key = Input::RIGHT; break;
+                case SDLK_n:      key = Input::NEXT_GAME; break;
+                case SDLK_l:      key = Input::NEXT_LIB; break;
+                case SDLK_r:      key = Input::RESTART; break;
+                case SDLK_ESCAPE: key = Input::MENU; break;
+                case SDLK_e:      key = Input::EXIT; break;
+                case SDLK_RETURN: key = Input::SELECT; break;
+                case SDLK_SPACE:  key = Input::TOGGLE_SOUND; break;
                 default: break;
+            }
+            if (key != Input::NONE && result == Input::NONE)
+                result = key;
+        }
+        if (event.type == SDL_MOUSEBUTTONDOWN) {
+            int button = 0;
+            if (event.button.button == SDL_BUTTON_LEFT)
+                button = 1;
+            else if (event.button.button == SDL_BUTTON_RIGHT)
+                button = 2;
+            if (button != 0) {
+                int x = event.button.x / SDL_TILE_SIZE;
+                int y = event.button.y / SDL_TILE_SIZE;
+                _mouseClicks.push({x, y, button});
             }
         }
     }
-    return Input::NONE;
+    return result;
+}
+
+bool SDL2Display::getMouseClick(int &x, int &y, int &button)
+{
+    if (_mouseClicks.empty())
+        return false;
+    MouseClick click = _mouseClicks.front();
+    _mouseClicks.pop();
+    x = click.x;
+    y = click.y;
+    button = click.button;
+    return true;
 }
 
 void SDL2Display::drawText(const Tile &tile, const SDL_Color &c)
