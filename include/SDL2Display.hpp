@@ -8,14 +8,14 @@
 #ifndef SDL2DISPLAY_HPP
     #define SDL2DISPLAY_HPP
 
-#include "IDisplay.hpp"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
-#include <queue>
+    #include <SDL2/SDL.h>
+    #include <SDL2/SDL_ttf.h>
+    #include <queue>
+    #include "IDisplay.hpp"
 
-const char* PATH_FONT = "./assets/MericaFuturistBlackItalic_PERSONAL_USE_ONLY.otf";
-const int CHAR_SIZE = 14;
-const int SDL_TILE_SIZE = 16;
+    const std::string PATH_FONT = "./assets/PressStart2P-Regular.ttf";
+    const int CHAR_SIZE = 10;
+    const int SDL_TILE_SIZE = 16;
 
 class SDL2Display : public IDisplay {
     public:
@@ -32,19 +32,22 @@ class SDL2Display : public IDisplay {
         bool getMouseClick(int &x, int &y, int &button) override;
         bool getTextInput(char &ch) override;
 
+        Input handleKey(SDL_Keycode keycode);
+        void handleTextInput(const SDL_Event &event);
+        void handleMouse(const SDL_Event &event);
+
     private:
-        SDL_Window* _window = nullptr;
-        SDL_Renderer* _renderer = nullptr;
-        TTF_Font* _font = nullptr;
-        TTF_Font* _fallbackFont = nullptr;
+        SDL_Window* mWindow = nullptr;
+        SDL_Renderer* mRenderer = nullptr;
+        TTF_Font* mFont = nullptr;
 
         struct MouseClick {
             int x;
             int y;
             int button;
         };
-        std::queue<MouseClick> _mouseClicks;
-        std::queue<char> _textInputs;
+        std::queue<MouseClick> mMouseClicks;
+        std::queue<char> mTextInputs;
 
         SDL_Color toSDLColor(const Color &c) const;
         void drawText(const Tile &tile, const SDL_Color &c);

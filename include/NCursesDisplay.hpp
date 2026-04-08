@@ -8,9 +8,9 @@
 #ifndef NCURSESDISPLAY_HPP
     #define NCURSESDISPLAY_HPP
 
-#include "IDisplay.hpp"
-#include <queue>
-#include <unordered_map>
+    #include <queue>
+    #include <unordered_map>
+    #include "IDisplay.hpp"
 
 class NCursesDisplay : public IDisplay {
     public:
