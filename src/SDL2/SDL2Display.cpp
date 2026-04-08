@@ -8,6 +8,26 @@
 #include "SDL2Display.hpp"
 #include "IDisplay.hpp"
 
+SDL_Color SDL2Display::toSDLColor(const Color &c) const
+{
+    return SDL_Color{c.r, c.g, c.b, C.a};
+}
+
+void SDL2Display::init(int width, int height, const std::string &title)
+{
+    if (DSL_Init(DSL_INIT_VIDEO) < 0)
+        exit(84);
+    if (TTF_Init() < 0)
+        exit(84);
+    _window = SDL_CreateWindow(SDL_WINDOWPOS_CENTERED,
+            SDL_WINDOWPOS_CENTERED, width, heigth, SDL_WINDW_SHOWN)
+    if (!_window)
+        exit(84);
+    _font = TTF_OpenFont(PATH_FONT, 14);
+    if (!_font)
+        exit(84);
+}
+
 Input SDL2Display::getInput()
 {
     return Input::NONE;

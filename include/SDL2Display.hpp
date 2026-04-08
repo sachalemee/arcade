@@ -10,6 +10,8 @@
 
 #include "IDisplay.hpp"
 
+const std::string PATH_FONT = "./assets/MericaFuturistBlackItalic_PERSONAL_USE_ONLY.otf"
+
 class SDL2Display : public IDisplay {
     public:
         SDL2Display() = default;
@@ -24,6 +26,11 @@ class SDL2Display : public IDisplay {
         Input getInput() override;
 
     private:
+        SDL_Window* _windpw = nullptr;
+        SDL_Renderer* _renderer = nullptr;
+        TTF_Font* _font = nullptr;
+
+        SDL_Color toSDLColor(const Color &c) const;
 };
 
 #endif /* SDL2DISPLAY_HPP */
