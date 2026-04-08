@@ -145,6 +145,12 @@ void Core::updateGameLogic(Input input)
         updateMenuTransitions();
     } else {
         if (!mGame) return;
+        int mouseX = 0;
+        int mouseY = 0;
+        int mouseButton = 0;
+        while (mDisplay->getMouseClick(mouseX, mouseY, mouseButton)) {
+            mGame->onMouseClick(mouseX, mouseY, mouseButton);
+        }
         mGame->update(input);
         mDisplay->clear();
         mDisplay->draw(mGame->getMap());
