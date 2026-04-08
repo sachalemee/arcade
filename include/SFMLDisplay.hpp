@@ -10,6 +10,7 @@
 
 #include "IDisplay.hpp"
 #include <SFML/Graphics.hpp>
+#include <queue>
 
 const std::string PATH_FONT = "./assets/MericaFuturistBlackItalic_PERSONAL_USE_ONLY.otf";
 const int TILE_SIZE = 16;
@@ -28,6 +29,7 @@ class SFMLDisplay : public IDisplay {
         void draw(const std::vector<Tile> &tiles) override;
 
         Input getInput() override;
+        bool getMouseClick(int &x, int &y, int &button) override;
 
     private:
         sf::RenderWindow _window;
@@ -35,7 +37,14 @@ class SFMLDisplay : public IDisplay {
         sf::Font    _fallbackFont;
         bool _hasPrimaryFont = false;
         bool _hasFallbackFont = false;
+        struct MouseClick {
+            int x;
+            int y;
+            int button;
+        };
+
         sf::Color toSFMLColor(const Color &c) const;
+        std::queue<MouseClick> _mouseClicks;
 };
 
 #endif /* SFMLDISPLAY_HPP */
