@@ -9,6 +9,12 @@
     #define SDL2DISPLAY_HPP
 
 #include "IDisplay.hpp"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+
+const char* PATH_FONT = "./assets/MericaFuturistBlackItalic_PERSONAL_USE_ONLY.otf";
+const int CHAR_SIZE = 14;
+const int SDL_TILE_SIZE = 16;
 
 class SDL2Display : public IDisplay {
     public:
@@ -24,6 +30,13 @@ class SDL2Display : public IDisplay {
         Input getInput() override;
 
     private:
+        SDL_Window* _window = nullptr;
+        SDL_Renderer* _renderer = nullptr;
+        TTF_Font* _font = nullptr;
+
+        SDL_Color toSDLColor(const Color &c) const;
+        void drawText(const Tile &tile, const SDL_Color &c);
+        void drawRect(const Tile &tile, const SDL_Color &c);
 };
 
 #endif /* SDL2DISPLAY_HPP */
