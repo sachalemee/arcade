@@ -11,8 +11,10 @@
 #include "IDisplay.hpp"
 #include <SFML/Graphics.hpp>
 
-#define PATH_FONT "./assets/MericaFuturistBlackItalic_PERSONAL_USE_ONLY.otf"
+const std::string PATH_FONT = "./assets/MericaFuturistBlackItalic_PERSONAL_USE_ONLY.otf";
 const int TILE_SIZE = 16;
+const int FPS = 60;
+const int CHAR_SIZE = 14;
 
 class SFMLDisplay : public IDisplay {
     public:

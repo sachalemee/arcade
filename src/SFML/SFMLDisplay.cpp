@@ -20,7 +20,7 @@ void SFMLDisplay::draw(const std::vector<Tile> &tiles)
             sf::Text text;
             text.setFont(_font);
             text.setString(tile.text);
-            text.setCharacterSize(14);
+            text.setCharacterSize(CHAR_SIZE);
             text.setFillColor(toSFMLColor(tile.color));
             text.setPosition(tile.x * TILE_SIZE, tile.y * TILE_SIZE);
             _window.draw(text);
@@ -78,7 +78,7 @@ Input SFMLDisplay::getInput()
 void SFMLDisplay::init(int width, int height, const std::string &title)
 {
     _window.create(sf::VideoMode(width, height), title);
-    _window.setFramerateLimit(60);
+    _window.setFramerateLimit(FPS);
 
     if (!_font.loadFromFile(PATH_FONT))
         exit(84);
