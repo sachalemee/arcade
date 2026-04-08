@@ -7,6 +7,24 @@
 
 #include "SDL2Display.hpp"
 #include "IDisplay.hpp"
+#include <cctype>
+
+namespace {
+    const char *kFallbackFonts[] = {
+        "/usr/share/fonts/adobe-source-code-pro-fonts/SourceCodePro-Regular.otf",
+        "/usr/share/fonts/abattis-cantarell-fonts/Cantarell-Regular.otf",
+        "/usr/share/fonts/aajohan-comfortaa-fonts/Comfortaa-Regular.otf"
+    };
+
+    bool needsFallbackFont(const std::string &text)
+    {
+        for (unsigned char ch : text) {
+            if (std::isdigit(ch) || ch == '|')
+                return true;
+        }
+        return false;
+    }
+}
 
 SDL_Color SDL2Display::toSDLColor(const Color &c) const
 {
@@ -27,7 +45,12 @@ void SDL2Display::init(int width, int height, const std::string &title)
     if (!_renderer)
         exit(84);
     _font = TTF_OpenFont(PATH_FONT, CHAR_SIZE);
-    if (!_font)
+    for (const char *path : kFallbackFonts) {
+        _fallbackFont = TTF_OpenFont(path, CHAR_SIZE);
+        if (_fallbackFont)
+            break;
+    }
+    if (!_font && !_fallbackFont)
         exit(84);
 }
 
@@ -65,7 +88,12 @@ void SDL2Display::drawText(const Tile &tile, const SDL_Color &c)
     int w;
     int h;
 
-    surface = TTF_RenderText_Solid(_font, tile.text.c_str(), c);
+    TTF_Font *font = _font;
+    if ((needsFallbackFont(tile.text) || !font) && _fallbackFont)
+        font = _fallbackFont;
+    if (!font)
+        return;
+    surface = TTF_RenderText_Solid(font, tile.text.c_str(), c);
     if (!surface)
         return;
     texture = SDL_CreateTextureFromSurface(_renderer, surface);
@@ -120,6 +148,8 @@ void SDL2Display::close()
 {
     if (_font)
         TTF_CloseFont(_font);
+    if (_fallbackFont)
+        TTF_CloseFont(_fallbackFont);
     if (_renderer)
         SDL_DestroyRenderer(_renderer);
     if (_window)
