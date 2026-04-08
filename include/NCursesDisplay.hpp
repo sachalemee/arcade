@@ -23,6 +23,7 @@ class NCursesDisplay : public IDisplay {
         void draw(const std::vector<Tile> &tiles) override;
 
         Input getInput() override;
+        bool getMouseClick(int &x, int &y, int &button) override;
 
     private:
         int mWidth;
