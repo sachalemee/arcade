@@ -1,3 +1,10 @@
+/*
+** EPITECH PROJECT, 2026
+** arcade
+** File description:
+** Core
+*/
+
 #include <cstdio>
 #include <cstdlib>
 #include <csignal>
@@ -15,14 +22,15 @@
 #include "LibManager.hpp"
 #include "arcade.hpp"
 
-static Core *g_coreInstance = nullptr;
-
 namespace {
-    const char *kSaveFile = "./arcade.sav";
+    volatile sig_atomic_t gStopRunning = 0;
+    const char *gameSavedFile = "./arcade.sav";
 
     void splitGameAndName(const std::string &value, std::string &game, std::string &name)
     {
-        size_t sep = value.find(": ");
+        size_t sep;
+
+        sep = value.find(": ");
         if (sep == std::string::npos) {
             game = "Unknown";
             name = value;
@@ -39,13 +47,12 @@ namespace {
 
 void signalHandler(int signal)
 {
-    if (signal == SIGINT && g_coreInstance)
-        g_coreInstance->setRunning(false);
+    if (signal == SIGINT)
+        gStopRunning = 1;
 }
 
 Core::Core(const std::string &initialDisplayLib)
 {
-    g_coreInstance = this;
     signal(SIGINT, signalHandler);
     mLibManager.scanDirectory(LIBDIRECTORY);
     loadScores();
@@ -55,6 +62,9 @@ Core::Core(const std::string &initialDisplayLib)
 
 void Core::goToMenu()
 {
+    std::vector<std::pair<std::string, int>> scores;
+    std::string label = "";
+
     if (mGame)
         mGame->stop();
     if (mMenu)
@@ -63,20 +73,19 @@ void Core::goToMenu()
     mMenu = mMenuLoader->getInstance("createMenu");
     mMenu->setGameLibs(mLibManager.getGameLibs());
     mMenu->setDisplayLibs(mLibManager.getDisplayLibs());
-    std::vector<std::pair<std::string, int>> scores;
-    for (const auto& player : mScores) {
-        std::string label = player.name;
-        if (!player.game.empty())
-            label = player.game + ": " + player.name;
-        scores.push_back({label, player.highScore});
+    for (std::vector<Player>::const_iterator it = mScores.begin();
+         it != mScores.end(); ++it) {
+        label = it->name;
+        if (!it->game.empty())
+            label = it->game + ": " + it->name;
+        scores.push_back(std::make_pair(label, it->highScore));
     }
     mMenu->setScores(scores);
     if (!mLastSaveMessage.empty()) {
         mMenu->setStatusMessage(mLastSaveMessage);
         mLastSaveMessage.clear();
-    } else {
+    } else
         mMenu->setStatusMessage("");
-    }
     mMenu->init();
     mGame = nullptr;
     mGameLoader = nullptr;
@@ -85,65 +94,77 @@ void Core::goToMenu()
 
 void Core::saveScore()
 {
+    bool found = false;
+    std::ofstream out;
+    Player entry;
+
     if (mPlayer.name.empty())
         mPlayer.name = "Player";
     if (mPlayer.game.empty())
         mPlayer.game = "Unknown";
-    bool found = false;
-    for (auto &entry : mScores) {
-        if (entry.name == mPlayer.name && entry.game == mPlayer.game) {
-            entry.highScore = std::max(entry.highScore, mPlayer.score);
+    found = false;
+    for (std::vector<Player>::iterator it = mScores.begin();
+         it != mScores.end(); ++it) {
+        if (it->name == mPlayer.name && it->game == mPlayer.game) {
+            it->highScore = std::max(it->highScore, mPlayer.score);
             found = true;
             break;
         }
     }
     if (!found) {
-        Player entry;
         entry.game = mPlayer.game;
         entry.name = mPlayer.name;
         entry.highScore = mPlayer.score;
         mScores.push_back(entry);
     }
-
-    std::ofstream out(kSaveFile, std::ios::trunc);
+    out.open(gameSavedFile, std::ios::trunc);
     if (!out)
         return;
-    for (const auto &entry : mScores)
-        out << entry.game << ": " << entry.name << "\t" << entry.highScore << "\n";
+    for (std::vector<Player>::const_iterator it = mScores.begin();
+         it != mScores.end(); ++it) {
+        out << it->game << ": " << it->name
+            << "\t" << it->highScore << "\n";
+    }
     mLastSaveMessage = "save OK";
 }
 
 void Core::loadScores()
 {
+    std::ifstream in;
+    std::string line = "";
+    size_t tab = 0;
+    std::string left = "";
+    std::string scoreStr = "";
+    int score = 0;
+    std::string game = "";
+    std::string name = "";
+    bool found = false;
+    Player entry;
+
     mScores.clear();
-    std::ifstream in(kSaveFile);
+    in.open(gameSavedFile);
     if (!in)
         return;
-    std::string line;
     while (std::getline(in, line)) {
         if (line.empty())
             continue;
-        size_t tab = line.rfind('\t');
+        tab = line.rfind('\t');
         if (tab == std::string::npos)
             continue;
-        std::string left = line.substr(0, tab);
-        std::string scoreStr = line.substr(tab + 1);
-        int score = 0;
-        std::istringstream scoreStream(scoreStr);
-        scoreStream >> score;
-        std::string game;
-        std::string name;
+        left = line.substr(0, tab);
+        scoreStr = line.substr(tab + 1);
+        std::istringstream(scoreStr) >> score;
         splitGameAndName(left, game, name);
-        bool found = false;
-        for (auto &entry : mScores) {
-            if (entry.name == name && entry.game == game) {
-                entry.highScore = std::max(entry.highScore, score);
+        found = false;
+        for (std::vector<Player>::iterator it = mScores.begin();
+             it != mScores.end(); ++it) {
+            if (it->name == name && it->game == game) {
+                it->highScore = std::max(it->highScore, score);
                 found = true;
                 break;
             }
         }
         if (!found) {
-            Player entry;
             entry.game = game;
             entry.name = name;
             entry.highScore = score;
@@ -164,10 +185,8 @@ void Core::handleInput(Input input)
         goToMenu();
         return;
     }
-    if (input == Input::RESTART && mGame) {
+    if (input == Input::RESTART && mGame)
         mGame->init();
-        return;
-    }
 }
 
 void Core::switchDisplay(const std::string &path)
@@ -179,16 +198,15 @@ void Core::switchDisplay(const std::string &path)
     mDisplayLoader = nullptr;
     mDisplayLoader = std::make_unique<DLLoader<IDisplay>>(path);
     mDisplay = mDisplayLoader->getInstance("createDisplay");
-    mDisplay->init(600, 800, "Arcade");
+    mDisplay->init(800, 600, "Arcade");
 }
 
 void Core::switchGame(const std::string &path)
 {
     if (mGame)
         mGame->stop();
-    if (mMenu) {
+    if (mMenu)
         mPlayer.name = mMenu->getPlayerName();
-    }
     if (mPlayer.name.empty())
         mPlayer.name = "Player";
     mMenu = nullptr;
@@ -196,7 +214,8 @@ void Core::switchGame(const std::string &path)
     mGameLoader = std::make_unique<DLLoader<IGame>>(path);
     mGame = mGameLoader->getInstance("createGame");
     mPlayer.score = 0;
-    mGame->init();
+    if (mGame)
+        mGame->init();
     mPlayer.game = mGame ? mGame->getName() : "Unknown";
     if (mPlayer.game.empty())
         mPlayer.game = "Unknown";
@@ -205,26 +224,30 @@ void Core::switchGame(const std::string &path)
 
 bool Core::isGameEnded()
 {
-    if (mGame && mGame->isOver()) {
-        mPlayer.score = mGame->getScore();
-        saveScore();
-        goToMenu();
-        return true;
-    }
-    return false;
+    if (!mGame)
+        return false;
+    if (!mGame->isOver())
+        return false;
+    mPlayer.score = mGame->getScore();
+    saveScore();
+    goToMenu();
+    return true;
 }
 
 void Core::updateMenuTransitions()
 {
+    std::string displayLib = "";
+    std::string gameLib = "";
+
     if (!mMenu)
         return;
     if (mMenu->wantsToChangeDisplay()) {
-        std::string displayLib = mMenu->getSelectedDisplay();
+        displayLib = mMenu->getSelectedDisplay();
         if (!displayLib.empty())
             switchDisplay(displayLib);
     }
     if (mMenu->wantsToLaunchGame()) {
-        std::string gameLib = mMenu->getSelectedGame();
+        gameLib = mMenu->getSelectedGame();
         if (!gameLib.empty())
             switchGame(gameLib);
     }
@@ -241,39 +264,43 @@ void Core::updateDisplay()
 
 void Core::updateGameLogic(Input input)
 {
+    char ch;
+    int mouseX = 0;
+    int mouseY = 0;
+    int mouseButton = 0;
+
     if (mInMenu) {
-        if (!mMenu) return;
+        if (!mMenu)
+            return;
         mMenu->update(input);
-        char ch = '\0';
-        while (mDisplay->getTextInput(ch)) {
+        while (mDisplay->getTextInput(ch))
             mMenu->appendPlayerName(ch);
-        }
         mDisplay->clear();
         mDisplay->draw(mMenu->getMap());
         mDisplay->display();
         updateMenuTransitions();
-    } else {
-        if (!mGame) return;
-        int mouseX = 0;
-        int mouseY = 0;
-        int mouseButton = 0;
-        while (mDisplay->getMouseClick(mouseX, mouseY, mouseButton)) {
-            mGame->onMouseClick(mouseX, mouseY, mouseButton);
-        }
-        mGame->update(input);
-        if (isGameEnded())
-            return;
-        mDisplay->clear();
-        mDisplay->draw(mGame->getMap());
-        mDisplay->display();
+        return;
     }
+    if (!mGame)
+        return;
+    while (mDisplay->getMouseClick(mouseX, mouseY, mouseButton))
+        mGame->onMouseClick(mouseX, mouseY, mouseButton);
+    mGame->update(input);
+    if (isGameEnded())
+        return;
+    mDisplay->clear();
+    mDisplay->draw(mGame->getMap());
+    mDisplay->display();
 }
 
 int Core::run()
 {
-    Input input = Input::NONE;
+    Input input;
 
+    input = Input::NONE;
     while (mIsRunning) {
+        if (gStopRunning)
+            mIsRunning = false;
         input = mDisplay->getInput();
         handleInput(input);
         updateGameLogic(input);
