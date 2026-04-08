@@ -30,6 +30,28 @@ void SDL2Display::init(int width, int height, const std::string &title)
 
 Input SDL2Display::getInput()
 {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT)
+            return Input::EXIT;
+
+        if (event.type == SDL_KEYDOWN) {
+            switch (event.key.keysym.sym) {
+                case SDLK_UP:     return Input::UP;
+                case SDLK_DOWN:   return Input::DOWN;
+                case SDLK_LEFT:   return Input::LEFT;
+                case SDLK_RIGHT:  return Input::RIGHT;
+                case SDLK_n:      return Input::NEXT_GAME;
+                case SDLK_l:      return Input::NEXT_LIB;
+                case SDLK_r:      return Input::RESTART;
+                case SDLK_ESCAPE: return Input::MENU;
+                case SDLK_e:      return Input::EXIT;
+                case SDLK_RETURN: return Input::SELECT;
+                case SDLK_SPACE:  return Input::TOGGLE_SOUND;
+                default: break;
+            }
+        }
+    }
     return Input::NONE;
 }
 
@@ -82,11 +104,13 @@ void SDL2Display::draw(const std::vector<Tile> &tiles)
 
 void SDL2Display::display()
 {
+    SDL_RenderPresent(_renderer);
 }
 
 void SDL2Display::clear()
 {
-    SDL_RenderPresent(_renderer);
+    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
+    SDL_RenderClear(_renderer);
 }
 
 
@@ -102,14 +126,8 @@ void SDL2Display::close()
     SDL_QUIT;
 }
 
-void SDL2Display::init(int width, int height, const std::string &/* title */)
-{
-    (void)width;
-    (void)height;
-}
-
 extern "C" {
-    // IDisplay *createDisplay() {
-        // return new SDL2Display();
-    // }
+    IDisplay *createDisplay() {
+        return new SDL2Display();
+    }
 }
