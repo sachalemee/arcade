@@ -32,6 +32,9 @@ class SFMLDisplay : public IDisplay {
     private:
         sf::RenderWindow _window;
         sf::Font    _font;
+        sf::Font    _fallbackFont;
+        bool _hasPrimaryFont = false;
+        bool _hasFallbackFont = false;
         sf::Color toSFMLColor(const Color &c) const;
 };
 

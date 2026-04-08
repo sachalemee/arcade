@@ -33,6 +33,7 @@ class SDL2Display : public IDisplay {
         SDL_Window* _window = nullptr;
         SDL_Renderer* _renderer = nullptr;
         TTF_Font* _font = nullptr;
+        TTF_Font* _fallbackFont = nullptr;
 
         SDL_Color toSDLColor(const Color &c) const;
         void drawText(const Tile &tile, const SDL_Color &c);
