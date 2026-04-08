@@ -73,14 +73,15 @@ void NCursesDisplay::draw(const std::vector<Tile> &tiles)
     for (const auto &tile: tiles) {
         pair = getColorPair(tile.color);
         attron(COLOR_PAIR(pair));
-        if (tile.type == TileType::TEXT) {
+        if (!tile.text.empty() || tile.type == TileType::TEXT) {
             for (size_t i = 0; i < tile.text.length(); i++) {
                 mvaddch(tile.y, tile.x + i, tile.text[i]);
             }
-        } else
+        } else {
             mvaddch(tile.y, tile.x, tileToChar(tile.type));
+        }
         attroff(COLOR_PAIR(pair));
-    } 
+    }
 }
 
 void NCursesDisplay::display()
