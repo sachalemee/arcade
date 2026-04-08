@@ -11,6 +11,7 @@
 #include "IDisplay.hpp"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <queue>
 
 const char* PATH_FONT = "./assets/MericaFuturistBlackItalic_PERSONAL_USE_ONLY.otf";
 const int CHAR_SIZE = 14;
@@ -28,12 +29,20 @@ class SDL2Display : public IDisplay {
         void draw(const std::vector<Tile> &tiles) override;
 
         Input getInput() override;
+        bool getMouseClick(int &x, int &y, int &button) override;
 
     private:
         SDL_Window* _window = nullptr;
         SDL_Renderer* _renderer = nullptr;
         TTF_Font* _font = nullptr;
         TTF_Font* _fallbackFont = nullptr;
+
+        struct MouseClick {
+            int x;
+            int y;
+            int button;
+        };
+        std::queue<MouseClick> _mouseClicks;
 
         SDL_Color toSDLColor(const Color &c) const;
         void drawText(const Tile &tile, const SDL_Color &c);
