@@ -10,7 +10,8 @@
 
 #include "IDisplay.hpp"
 
-const std::string PATH_FONT = "./assets/MericaFuturistBlackItalic_PERSONAL_USE_ONLY.otf"
+const std::string PATH_FONT = "./assets/MericaFuturistBlackItalic_PERSONAL_USE_ONLY.otf";
+const int CHAR_SIZE = 14;
 
 class SDL2Display : public IDisplay {
     public:
@@ -26,7 +27,7 @@ class SDL2Display : public IDisplay {
         Input getInput() override;
 
     private:
-        SDL_Window* _windpw = nullptr;
+        SDL_Window* _window = nullptr;
         SDL_Renderer* _renderer = nullptr;
         TTF_Font* _font = nullptr;
 
