@@ -8,6 +8,29 @@
 #include "IMenu.hpp"
 #include "Menu.hpp"
 
+namespace {
+    bool isMenuLib(const std::string &path)
+    {
+        return path.find("arcade_menu.so") != std::string::npos;
+    }
+
+    std::string formatLibName(const std::string &path)
+    {
+        size_t slash = path.find_last_of("/");
+        std::string name = (slash == std::string::npos) ? path : path.substr(slash + 1);
+        const std::string prefix = "arcade_";
+        if (name.rfind(prefix, 0) == 0)
+            name = name.substr(prefix.size());
+        if (name.size() > 3 && name.substr(name.size() - 3) == ".so")
+            name = name.substr(0, name.size() - 3);
+        for (char &ch : name) {
+            if (ch == '_')
+                ch = ' ';
+        }
+        return name;
+    }
+}
+
 void Menu::init()
 {
     mSelectedGame = 0;
@@ -39,7 +62,14 @@ std::string Menu::getName() const
 
 void Menu::setGameLibs(const std::vector<std::string> &libs)
 {
-    mGameLibs = libs;
+    mGameLibs.clear();
+    for (const auto &lib : libs) {
+        if (isMenuLib(lib))
+            continue;
+        mGameLibs.push_back(lib);
+    }
+    if (mSelectedGame >= (int)mGameLibs.size())
+        mSelectedGame = 0;
 }
 
 void Menu::setDisplayLibs(const std::vector<std::string> &libs)
@@ -144,10 +174,10 @@ void Menu::addGames(std::vector<Tile> &tiles) const
                         {200, 100, 100, 255}, "No games available"});
     } else {
         for (int i = 0; i < (int)mGameLibs.size(); i++) {
-            selected = (i ==mSelectedGame &&_section == Section::GAMES);
+            selected = (i == mSelectedGame && _section == Section::GAMES);
             c = selected ? Color{0, 255, 0, 255} : Color{255, 255, 255, 255};
             prefix = selected ? "> " : "  ";
-            tiles.push_back({0, 3 + i, TileType::TEXT, c, prefix + mGameLibs[i]});
+            tiles.push_back({0, 3 + i, TileType::TEXT, c, prefix + formatLibName(mGameLibs[i])});
         }
     }    
 }
