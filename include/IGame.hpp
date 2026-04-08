@@ -21,6 +21,7 @@ class IGame {
         virtual int getScore() const = 0;
         virtual bool isOver() const = 0;
         virtual void stop() = 0;
+        virtual void onMouseClick(int /*x*/, int /*y*/, int /*button*/) {}
         virtual std::string getName() const = 0;
 };
 
