@@ -7,6 +7,24 @@
 
 #include "IDisplay.hpp"
 #include "SFMLDisplay.hpp"
+#include <cctype>
+
+namespace {
+    const char *kFallbackFonts[] = {
+        "/usr/share/fonts/adobe-source-code-pro-fonts/SourceCodePro-Regular.otf",
+        "/usr/share/fonts/abattis-cantarell-fonts/Cantarell-Regular.otf",
+        "/usr/share/fonts/aajohan-comfortaa-fonts/Comfortaa-Regular.otf"
+    };
+
+    bool needsFallbackFont(const std::string &text)
+    {
+        for (unsigned char ch : text) {
+            if (std::isdigit(ch) || ch == '|')
+                return true;
+        }
+        return false;
+    }
+}
 
 sf::Color SFMLDisplay::toSFMLColor(const Color &c) const
 {
@@ -18,12 +36,16 @@ void SFMLDisplay::draw(const std::vector<Tile> &tiles)
     for (const auto &tile : tiles) {
         if (tile.type == TileType::TEXT) {
             sf::Text text;
-            text.setFont(_font);
+            bool useFallback = needsFallbackFont(tile.text) || !_hasPrimaryFont;
+            const sf::Font &font = (useFallback && _hasFallbackFont) ? _fallbackFont : _font;
+            text.setFont(font);
             text.setString(tile.text);
             text.setCharacterSize(CHAR_SIZE);
             text.setFillColor(toSFMLColor(tile.color));
             text.setPosition(tile.x * TILE_SIZE, tile.y * TILE_SIZE);
             _window.draw(text);
+        } else if (tile.type == TileType::EMPTY && !tile.text.empty()) {
+            continue;
         } else {
             sf::RectangleShape rect(sf::Vector2f(TILE_SIZE - 1, TILE_SIZE -1));
             rect.setPosition(tile.x * TILE_SIZE, tile.y * TILE_SIZE);
@@ -80,7 +102,15 @@ void SFMLDisplay::init(int width, int height, const std::string &title)
     _window.create(sf::VideoMode(width, height), title);
     _window.setFramerateLimit(FPS);
 
-    if (!_font.loadFromFile(PATH_FONT))
+    _hasPrimaryFont = _font.loadFromFile(PATH_FONT);
+    _hasFallbackFont = false;
+    for (const char *path : kFallbackFonts) {
+        if (_fallbackFont.loadFromFile(path)) {
+            _hasFallbackFont = true;
+            break;
+        }
+    }
+    if (!_hasPrimaryFont && !_hasFallbackFont)
         exit(84);
 }
 
