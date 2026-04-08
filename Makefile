@@ -33,7 +33,14 @@ GRAPHICS_SO		=	$(LIB_DIR)/arcade_ncurses.so \
 					$(LIB_DIR)/arcade_sdl2.so \
 					$(LIB_DIR)/arcade_sfml.so
 
-GAMES_SO		=	
+GAMES_MINESWEEPER_SRC	= 	games/Minesweeper.cpp
+GAMES_SNAKE_SRC			= 	games/Snake.cpp
+
+GAMES_MINESWEEPER_OBJ	= 	$(GAMES_MINESWEEPER_SRC:.cpp=.o)
+GAMES_SNAKE_OBJ			= 	$(GAMES_SNAKE_SRC:.cpp=.o)
+
+GAMES_SO		=	$(LIB_DIR)/arcade_minesweeper.so \
+					$(LIB_DIR)/arcade_snake.so
 
 MENU_SRC 		= 	src/menu/menu.cpp
 MENU_OBJ 		= 	$(MENU_SRC:.cpp=.o)
@@ -57,11 +64,19 @@ $(LIB_DIR)/arcade_ncurses.so: $(GRAPHICS_NCURSES_OBJ) lib
 				@echo "✓ Built: $@"
 
 $(LIB_DIR)/arcade_sdl2.so: $(GRAPHICS_SDL2_OBJ) lib
-				$(CXX) $(CXXFLAGS) -shared $(GRAPHICS_SDL2_OBJ) -o $@ $(shell pkg-config --cflags --libs sdl2 2>/dev/null || echo "-lSDL2") -lSDL2_ttf
+				$(CXX) $(CXXFLAGS) -shared $(GRAPHICS_SDL2_OBJ) -o $@ $(shell pkg-config --cflags --libs sdl2 SDL2_ttf 2>/dev/null || echo "-lSDL2 -lSDL2_ttf")
 				@echo "✓ Built: $@"
 
 $(LIB_DIR)/arcade_sfml.so: $(GRAPHICS_SFML_OBJ) lib
 				$(CXX) $(CXXFLAGS) -shared $(GRAPHICS_SFML_OBJ) -o $@ $(shell pkg-config --cflags --libs sfml-graphics 2>/dev/null || echo "-lsfml-graphics -lsfml-window -lsfml-system")
+				@echo "✓ Built: $@"
+
+$(LIB_DIR)/arcade_minesweeper.so: $(GAMES_MINESWEEPER_OBJ) lib
+				$(CXX) $(CXXFLAGS) -shared $(GAMES_MINESWEEPER_OBJ) -o $@
+				@echo "✓ Built: $@"
+
+$(LIB_DIR)/arcade_snake.so: $(GAMES_SNAKE_OBJ) lib
+				$(CXX) $(CXXFLAGS) -shared $(GAMES_SNAKE_OBJ) -o $@
 				@echo "✓ Built: $@"
 
 $(MENU_SO): $(MENU_OBJ) lib
@@ -78,7 +93,7 @@ games:			lib $(GAMES_SO) $(MENU_SO)
 				@echo "✓ Games and menu libraries built"
 
 clean:
-				$(RM) $(CORE_OBJ) $(MENU_OBJ) $(GRAPHICS_NCURSES_OBJ) $(GRAPHICS_SDL2_OBJ) $(GRAPHICS_SFML_OBJ)
+				$(RM) $(CORE_OBJ) $(MENU_OBJ) $(GRAPHICS_NCURSES_OBJ) $(GRAPHICS_SDL2_OBJ) $(GRAPHICS_SFML_OBJ) $(GAMES_MINESWEEPER_OBJ) $(GAMES_SNAKE_OBJ)
 				@echo "✓ Objects cleaned"
 
 fclean:			clean
