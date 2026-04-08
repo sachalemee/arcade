@@ -5,26 +5,10 @@
 ** SDL2Display
 */
 
+#include <cctype>
 #include "SDL2Display.hpp"
 #include "IDisplay.hpp"
-#include <cctype>
-
-namespace {
-    const char *kFallbackFonts[] = {
-        "/usr/share/fonts/adobe-source-code-pro-fonts/SourceCodePro-Regular.otf",
-        "/usr/share/fonts/abattis-cantarell-fonts/Cantarell-Regular.otf",
-        "/usr/share/fonts/aajohan-comfortaa-fonts/Comfortaa-Regular.otf"
-    };
-
-    bool needsFallbackFont(const std::string &text)
-    {
-        for (unsigned char ch : text) {
-            if (std::isdigit(ch) || ch == '|')
-                return true;
-        }
-        return false;
-    }
-}
+#include "arcade.hpp"
 
 SDL_Color SDL2Display::toSDLColor(const Color &c) const
 {
@@ -34,93 +18,122 @@ SDL_Color SDL2Display::toSDLColor(const Color &c) const
 void SDL2Display::init(int width, int height, const std::string &title)
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
-        exit(84);
+        exit(EXITFAILURE);
     if (TTF_Init() < 0)
-        exit(84);
+        exit(EXITFAILURE);
     SDL_StartTextInput();
-    _window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
-    if (!_window)
-        exit(84);
-    _renderer = SDL_CreateRenderer(_window, -1, SDL_RENDERER_ACCELERATED);
-    if (!_renderer)
-        exit(84);
-    _font = TTF_OpenFont(PATH_FONT, CHAR_SIZE);
-    for (const char *path : kFallbackFonts) {
-        _fallbackFont = TTF_OpenFont(path, CHAR_SIZE);
-        if (_fallbackFont)
-            break;
+    mWindow = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
+    if (!mWindow)
+        exit(EXITFAILURE);
+    mRenderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED);
+    if (!mRenderer)
+        exit(EXITFAILURE);
+    mFont = TTF_OpenFont(PATH_FONT.c_str(), CHAR_SIZE);
+    if (!mFont)
+        exit(EXITFAILURE);
+}
+
+Input SDL2Display::handleKey(SDL_Keycode keycode)
+{
+    switch (keycode) {
+        case SDLK_UP:
+            return Input::UP;
+        case SDLK_DOWN:
+            return Input::DOWN;
+        case SDLK_LEFT:
+            return Input::LEFT;
+        case SDLK_RIGHT:
+            return Input::RIGHT;
+        case SDLK_n:
+            return Input::NEXT_GAME;
+        case SDLK_l:
+            return Input::NEXT_LIB;
+        case SDLK_r:
+            return Input::RESTART;
+        case SDLK_ESCAPE:
+            return Input::MENU;
+        case SDLK_e:
+            return Input::EXIT;
+        case SDLK_RETURN:
+            return Input::SELECT;
+        case SDLK_BACKSPACE:
+            return Input::BACKSPACE;
+        case SDLK_SPACE:
+            return Input::TOGGLE_SOUND;
+        default:
+            return Input::NONE;
     }
-    if (!_font && !_fallbackFont)
-        exit(84);
+}
+
+void SDL2Display::handleTextInput(const SDL_Event &event)
+{
+    int i = 0;
+    unsigned char ch = 0;
+
+    for (i = 0; event.text.text[i] != '\0'; i++) {
+        ch = (unsigned char)event.text.text[i];
+        if (ch >= 32 && ch < 127)
+            mTextInputs.push((char)ch);
+    }
+}
+
+void SDL2Display::handleMouse(const SDL_Event &event)
+{
+    int button = 0;
+    int x = 0;
+    int y = 0;
+
+    if (event.button.button == SDL_BUTTON_LEFT)
+        button = 1;
+    else if (event.button.button == SDL_BUTTON_RIGHT)
+        button = 2;
+    if (button == 0)
+        return;
+    x = event.button.x / SDL_TILE_SIZE;
+    y = event.button.y / SDL_TILE_SIZE;
+    mMouseClicks.push({x, y, button});
 }
 
 Input SDL2Display::getInput()
 {
-    Input result = Input::NONE;
     SDL_Event event;
+    Input result = Input::NONE;
+    Input key;
+
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT)
-            result = Input::EXIT;
-
+            return Input::EXIT;
         if (event.type == SDL_KEYDOWN) {
-            Input key = Input::NONE;
-            switch (event.key.keysym.sym) {
-                case SDLK_UP:     key = Input::UP; break;
-                case SDLK_DOWN:   key = Input::DOWN; break;
-                case SDLK_LEFT:   key = Input::LEFT; break;
-                case SDLK_RIGHT:  key = Input::RIGHT; break;
-                case SDLK_n:      key = Input::NEXT_GAME; break;
-                case SDLK_l:      key = Input::NEXT_LIB; break;
-                case SDLK_r:      key = Input::RESTART; break;
-                case SDLK_ESCAPE: key = Input::MENU; break;
-                case SDLK_e:      key = Input::EXIT; break;
-                case SDLK_RETURN: key = Input::SELECT; break;
-                case SDLK_BACKSPACE: key = Input::BACKSPACE; break;
-                case SDLK_SPACE:  key = Input::TOGGLE_SOUND; break;
-                default: break;
-            }
+            key = handleKey(event.key.keysym.sym);
             if (key != Input::NONE && result == Input::NONE)
                 result = key;
         }
-        if (event.type == SDL_TEXTINPUT) {
-            for (int i = 0; event.text.text[i] != '\0'; i++) {
-                unsigned char ch = static_cast<unsigned char>(event.text.text[i]);
-                if (ch >= 32 && ch < 127)
-                    _textInputs.push(static_cast<char>(ch));
-            }
-        }
-        if (event.type == SDL_MOUSEBUTTONDOWN) {
-            int button = 0;
-            if (event.button.button == SDL_BUTTON_LEFT)
-                button = 1;
-            else if (event.button.button == SDL_BUTTON_RIGHT)
-                button = 2;
-            if (button != 0) {
-                int x = event.button.x / SDL_TILE_SIZE;
-                int y = event.button.y / SDL_TILE_SIZE;
-                _mouseClicks.push({x, y, button});
-            }
-        }
+        if (event.type == SDL_TEXTINPUT)
+            handleTextInput(event);
+        if (event.type == SDL_MOUSEBUTTONDOWN)
+            handleMouse(event);
     }
     return result;
 }
 
 bool SDL2Display::getTextInput(char &ch)
 {
-    if (_textInputs.empty())
+    if (mTextInputs.empty())
         return false;
-    ch = _textInputs.front();
-    _textInputs.pop();
+    ch = mTextInputs.front();
+    mTextInputs.pop();
     return true;
 }
 
 bool SDL2Display::getMouseClick(int &x, int &y, int &button)
 {
-    if (_mouseClicks.empty())
+    MouseClick click;
+
+    if (mMouseClicks.empty())
         return false;
-    MouseClick click = _mouseClicks.front();
-    _mouseClicks.pop();
+    click = mMouseClicks.front();
+    mMouseClicks.pop();
     x = click.x;
     y = click.y;
     button = click.button;
@@ -129,26 +142,27 @@ bool SDL2Display::getMouseClick(int &x, int &y, int &button)
 
 void SDL2Display::drawText(const Tile &tile, const SDL_Color &c)
 {
-    SDL_Surface* surface = nullptr;
-    SDL_Texture* texture = nullptr;
-    int w;
-    int h;
+    SDL_Surface *surface;
+    SDL_Texture *texture;
+    SDL_Rect dst;
+    int w = 0;
+    int h = 0;
 
-    TTF_Font *font = _font;
-    if ((needsFallbackFont(tile.text) || !font) && _fallbackFont)
-        font = _fallbackFont;
-    if (!font)
+    if (!mFont)
         return;
-    surface = TTF_RenderText_Solid(font, tile.text.c_str(), c);
+    surface = TTF_RenderText_Solid(mFont, tile.text.c_str(), c);
     if (!surface)
         return;
-    texture = SDL_CreateTextureFromSurface(_renderer, surface);
+    texture = SDL_CreateTextureFromSurface(mRenderer, surface);
     SDL_FreeSurface(surface);
     if (!texture)
         return;
-    SDL_QueryTexture(texture, nullptr, nullptr, &w, &h);
-    SDL_Rect dst = {tile.x * SDL_TILE_SIZE, tile.y * SDL_TILE_SIZE, w, h};
-    SDL_RenderCopy(_renderer, texture, nullptr, &dst);
+    SDL_QueryTexture(texture, NULL, NULL, &w, &h);
+    dst.x = tile.x * SDL_TILE_SIZE;
+    dst.y = tile.y * SDL_TILE_SIZE;
+    dst.w = w;
+    dst.h = h;
+    SDL_RenderCopy(mRenderer, texture, NULL, &dst);
     SDL_DestroyTexture(texture);
 }
 
@@ -156,57 +170,55 @@ void SDL2Display::drawRect(const Tile &tile, const SDL_Color &c)
 {
     SDL_Rect rect;
 
-    rect = {tile.x * SDL_TILE_SIZE,
-            tile.y * SDL_TILE_SIZE,
-            SDL_TILE_SIZE - 1,
-            SDL_TILE_SIZE - 1
-    };
-    SDL_SetRenderDrawColor(_renderer, c.r, c.g, c.b, c.a);
-    SDL_RenderFillRect(_renderer, &rect);
+    rect.x = tile.x * SDL_TILE_SIZE;
+    rect.y = tile.y * SDL_TILE_SIZE;
+    rect.w = SDL_TILE_SIZE - 1;
+    rect.h = SDL_TILE_SIZE - 1;
+    SDL_SetRenderDrawColor(mRenderer, c.r, c.g, c.b, c.a);
+    SDL_RenderFillRect(mRenderer, &rect);
 }
 
 void SDL2Display::draw(const std::vector<Tile> &tiles)
 {
+    std::vector<Tile>::const_iterator it;
     SDL_Color c;
 
-    for (const auto &tile : tiles) {
-        c = toSDLColor(tile.color);
-        if (tile.type == TileType::TEXT && _font)
-            drawText(tile, c);
+    for (it = tiles.begin(); it != tiles.end(); ++it) {
+        c = toSDLColor(it->color);
+        if (it->type == TileType::TEXT && mFont)
+            drawText(*it, c);
         else
-            drawRect(tile, c);
+            drawRect(*it, c);
     }
 }
 
 void SDL2Display::display()
 {
-    SDL_RenderPresent(_renderer);
+    SDL_RenderPresent(mRenderer);
 }
 
 void SDL2Display::clear()
 {
-    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
-    SDL_RenderClear(_renderer);
+    SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
+    SDL_RenderClear(mRenderer);
 }
-
 
 void SDL2Display::close()
 {
-    if (_font)
-        TTF_CloseFont(_font);
-    if (_fallbackFont)
-        TTF_CloseFont(_fallbackFont);
-    if (_renderer)
-        SDL_DestroyRenderer(_renderer);
-    if (_window)
-        SDL_DestroyWindow(_window);
+    if (mFont)
+        TTF_CloseFont(mFont);
+    if (mRenderer)
+        SDL_DestroyRenderer(mRenderer);
+    if (mWindow)
+        SDL_DestroyWindow(mWindow);
     SDL_StopTextInput();
     TTF_Quit();
     SDL_Quit();
 }
 
 extern "C" {
-    IDisplay *createDisplay() {
+    IDisplay *createDisplay()
+    {
         return new SDL2Display();
     }
 }
