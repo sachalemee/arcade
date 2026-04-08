@@ -23,6 +23,9 @@ public:
     virtual std::string getSelectedGame() const = 0;
     virtual std::string getSelectedDisplay() const = 0;
     virtual std::string getPlayerName() const = 0;
+    virtual void appendPlayerName(char c) = 0;
+    virtual void setStatusMessage(const std::string &message) = 0;
+    virtual bool isEditingName() const = 0;
 
     virtual bool wantsToLaunchGame() const = 0;
     virtual bool wantsToChangeDisplay() const = 0;

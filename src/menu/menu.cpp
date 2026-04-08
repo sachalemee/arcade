@@ -7,6 +7,7 @@
 
 #include "IMenu.hpp"
 #include "Menu.hpp"
+#include <cctype>
 
 namespace {
     bool isMenuLib(const std::string &path)
@@ -99,6 +100,30 @@ std::string Menu::getSelectedDisplay() const
 std::string Menu::getPlayerName() const
 {
     return mLayerName;
+}
+
+void Menu::appendPlayerName(char c)
+{
+    if (_section != Section::NAME)
+        return;
+    if (mLayerName.size() >= 16)
+        return;
+    unsigned char uc = static_cast<unsigned char>(c);
+    if (std::isalnum(uc) || c == '_' || c == '-' || c == ' ') {
+        if (c == ' ' && (mLayerName.empty() || mLayerName.back() == ' '))
+            return;
+        mLayerName.push_back(c);
+    }
+}
+
+void Menu::setStatusMessage(const std::string &message)
+{
+    mStatusMessage = message;
+}
+
+bool Menu::isEditingName() const
+{
+    return _section == Section::NAME;
 }
 
 bool Menu::wantsToLaunchGame() const
@@ -215,6 +240,10 @@ void Menu::addControls(std::vector<Tile> &tiles, int nameY) const
     tiles.push_back({0, nameY + 3, TileType::TEXT,
         {150, 150, 150, 255},
         "UP/DOWN: navigate  LEFT/RIGHT: switch section  ENTER: launch"});
+    if (!mStatusMessage.empty()) {
+        tiles.push_back({0, nameY + 4, TileType::TEXT,
+            {120, 200, 120, 255}, "Status: " + mStatusMessage});
+    }
 }
 
 void Menu::handleUp()
@@ -268,8 +297,7 @@ void Menu::handleSelect()
     if (_section == Section::DISPLAYS) {
         // On peut switcher de display avec SELECT
         mWantsChangeDisplay = true;
-    } else if (_section == Section::NAME
-        || (_section == Section::GAMES && !mGameLibs.empty())) {
+    } else if (_section == Section::GAMES && !mGameLibs.empty()) {
         mWantsLaunch = true;
     }
 }
@@ -289,14 +317,20 @@ void Menu::update(Input input)
         case Input::DOWN: handleDown(); break;
         case Input::LEFT:
         case Input::RIGHT: handleSectionSwitch(); break;
-        case Input::NEXT_LIB: handleNextLib(); break;
-        case Input::NEXT_GAME: handleNextGame(); break;
+        case Input::NEXT_LIB:
+            if (_section == Section::DISPLAYS)
+                handleNextLib();
+            break;
+        case Input::NEXT_GAME:
+            if (_section == Section::GAMES)
+                handleNextGame();
+            break;
         case Input::SELECT:
-            if (mLayerName.empty())
+            if (_section == Section::GAMES && mLayerName.empty())
                 mLayerName = "Player";
             handleSelect();
             break;
-        case Input::TOGGLE_SOUND: handleNameEdit(); break;
+        case Input::BACKSPACE: handleNameEdit(); break;
         default: break;
     }
 }

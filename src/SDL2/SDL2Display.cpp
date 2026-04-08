@@ -37,6 +37,7 @@ void SDL2Display::init(int width, int height, const std::string &title)
         exit(84);
     if (TTF_Init() < 0)
         exit(84);
+    SDL_StartTextInput();
     _window = SDL_CreateWindow(title.c_str(), SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
     if (!_window)
@@ -75,11 +76,19 @@ Input SDL2Display::getInput()
                 case SDLK_ESCAPE: key = Input::MENU; break;
                 case SDLK_e:      key = Input::EXIT; break;
                 case SDLK_RETURN: key = Input::SELECT; break;
+                case SDLK_BACKSPACE: key = Input::BACKSPACE; break;
                 case SDLK_SPACE:  key = Input::TOGGLE_SOUND; break;
                 default: break;
             }
             if (key != Input::NONE && result == Input::NONE)
                 result = key;
+        }
+        if (event.type == SDL_TEXTINPUT) {
+            for (int i = 0; event.text.text[i] != '\0'; i++) {
+                unsigned char ch = static_cast<unsigned char>(event.text.text[i]);
+                if (ch >= 32 && ch < 127)
+                    _textInputs.push(static_cast<char>(ch));
+            }
         }
         if (event.type == SDL_MOUSEBUTTONDOWN) {
             int button = 0;
@@ -95,6 +104,15 @@ Input SDL2Display::getInput()
         }
     }
     return result;
+}
+
+bool SDL2Display::getTextInput(char &ch)
+{
+    if (_textInputs.empty())
+        return false;
+    ch = _textInputs.front();
+    _textInputs.pop();
+    return true;
 }
 
 bool SDL2Display::getMouseClick(int &x, int &y, int &button)
@@ -182,6 +200,7 @@ void SDL2Display::close()
         SDL_DestroyRenderer(_renderer);
     if (_window)
         SDL_DestroyWindow(_window);
+    SDL_StopTextInput();
     TTF_Quit();
     SDL_Quit();
 }

@@ -19,21 +19,26 @@ int NCursesDisplay::toNCursesColor(u_int8_t channel)
 Input NCursesDisplay::getInput()
 {
     int ch = getch();
+    Input result = Input::NONE;
 
     switch (ch) {
-        case KEY_UP: return Input::UP;
-        case KEY_DOWN: return Input::DOWN;
-        case KEY_LEFT: return Input::LEFT;
-        case KEY_RIGHT: return Input::RIGHT;
-        case 'n': return Input::NEXT_GAME;
-        case 'l': return Input::NEXT_LIB;
-        case 'r': return Input::RESTART;
-        case ESCKEY: return Input::MENU;
-        case 'e': return Input::EXIT;
-        case SPACEKEY: return Input::SELECT;
-        case ' ': return Input::TOGGLE_SOUND;
+        case KEY_UP: result = Input::UP; break;
+        case KEY_DOWN: result = Input::DOWN; break;
+        case KEY_LEFT: result = Input::LEFT; break;
+        case KEY_RIGHT: result = Input::RIGHT; break;
+        case 'n': result = Input::NEXT_GAME; break;
+        case 'l': result = Input::NEXT_LIB; break;
+        case 'r': result = Input::RESTART; break;
+        case ESCKEY: result = Input::MENU; break;
+        case 'e': result = Input::EXIT; break;
+        case SPACEKEY: result = Input::SELECT; break;
+        case KEY_BACKSPACE:
+        case 127: result = Input::BACKSPACE; break;
+        case ' ': result = Input::TOGGLE_SOUND; break;
     }
-    return Input::NONE;
+    if (ch >= 32 && ch <= 126)
+        mTextInputs.push(static_cast<char>(ch));
+    return result;
 }
 
 bool NCursesDisplay::getMouseClick(int &x, int &y, int &button)
@@ -42,6 +47,15 @@ bool NCursesDisplay::getMouseClick(int &x, int &y, int &button)
     (void)y;
     (void)button;
     return false;
+}
+
+bool NCursesDisplay::getTextInput(char &ch)
+{
+    if (mTextInputs.empty())
+        return false;
+    ch = mTextInputs.front();
+    mTextInputs.pop();
+    return true;
 }
 
 int NCursesDisplay::getColorPair(const Color &c)

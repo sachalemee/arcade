@@ -27,6 +27,9 @@ class Menu : public IMenu {
         std::string getSelectedGame() const override;
         std::string getSelectedDisplay() const override;
         std::string getPlayerName() const override;
+        void appendPlayerName(char c) override;
+        void setStatusMessage(const std::string &message) override;
+        bool isEditingName() const override;
         bool wantsToLaunchGame() const override;
         bool wantsToChangeDisplay() const override;
     
@@ -42,6 +45,7 @@ class Menu : public IMenu {
         bool mWantsLaunch = false;
         bool mWantsChangeDisplay = false;
         std::string mLayerName = "";
+        std::string mStatusMessage = "";
 
         int addPlayerName(std::vector<Tile> &tiles, int dispY) const;
         int addDisplays(std::vector<Tile> &tiles) const;

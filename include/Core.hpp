@@ -31,7 +31,7 @@ class Core {
         void setRunning(bool running) { mIsRunning = running; }
 
     private:
-        void isGameEnded();
+        bool isGameEnded();
         void switchDisplay(const std::string &path);
         void switchGame(const std::string &path);
         void handleInput(Input input);
@@ -58,6 +58,7 @@ class Core {
 
         bool mIsRunning = true;
         bool mInMenu = true;
+        std::string mLastSaveMessage = "";
 };
 
 #endif /* CORE_HPP */

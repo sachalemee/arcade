@@ -222,7 +222,7 @@ public:
 
     bool isOver() const override
     {
-        return gameOver;
+        return gameOver || won;
     }
 
     void placeMines(int avoid_x, int avoid_y) 

@@ -2,7 +2,10 @@
 #include <cstdlib>
 #include <csignal>
 #include <dlfcn.h>
+#include <algorithm>
+#include <fstream>
 #include <memory>
+#include <sstream>
 #include <unistd.h>
 #include "Core.hpp"
 #include "DLLoader.hpp"
@@ -13,6 +16,10 @@
 #include "arcade.hpp"
 
 static Core *g_coreInstance = nullptr;
+
+namespace {
+    const char *kSaveFile = "./arcade.sav";
+}
 
 void signalHandler(int signal)
 {
@@ -44,6 +51,12 @@ void Core::goToMenu()
     for (const auto& player : mScores)
         scores.push_back({player.name, player.highScore});
     mMenu->setScores(scores);
+    if (!mLastSaveMessage.empty()) {
+        mMenu->setStatusMessage(mLastSaveMessage);
+        mLastSaveMessage.clear();
+    } else {
+        mMenu->setStatusMessage("");
+    }
     mMenu->init();
     mGame = nullptr;
     mGameLoader = nullptr;
@@ -52,17 +65,71 @@ void Core::goToMenu()
 
 void Core::saveScore()
 {
-    // save in a text file
+    if (mPlayer.name.empty())
+        mPlayer.name = "Player";
+    bool found = false;
+    for (auto &entry : mScores) {
+        if (entry.name == mPlayer.name) {
+            entry.highScore = std::max(entry.highScore, mPlayer.score);
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        Player entry;
+        entry.name = mPlayer.name;
+        entry.highScore = mPlayer.score;
+        mScores.push_back(entry);
+    }
+
+    std::ofstream out(kSaveFile, std::ios::trunc);
+    if (!out)
+        return;
+    for (const auto &entry : mScores)
+        out << entry.name << "\t" << entry.highScore << "\n";
+    mLastSaveMessage = "Sauvegarde OK";
 }
 
 void Core::loadScores()
 {
-    // load from a text file
+    mScores.clear();
+    std::ifstream in(kSaveFile);
+    if (!in)
+        return;
+    std::string line;
+    while (std::getline(in, line)) {
+        if (line.empty())
+            continue;
+        size_t tab = line.rfind('\t');
+        if (tab == std::string::npos)
+            continue;
+        std::string name = line.substr(0, tab);
+        std::string scoreStr = line.substr(tab + 1);
+        int score = 0;
+        std::istringstream scoreStream(scoreStr);
+        scoreStream >> score;
+        bool found = false;
+        for (auto &entry : mScores) {
+            if (entry.name == name) {
+                entry.highScore = std::max(entry.highScore, score);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            Player entry;
+            entry.name = name;
+            entry.highScore = score;
+            mScores.push_back(entry);
+        }
+    }
 }
 
 void Core::handleInput(Input input)
 {
     if (input == Input::EXIT) {
+        if (mInMenu && mMenu && mMenu->isEditingName())
+            return;
         mIsRunning = false;
         return;
     }
@@ -92,21 +159,29 @@ void Core::switchGame(const std::string &path)
 {
     if (mGame)
         mGame->stop();
+    if (mMenu) {
+        mPlayer.name = mMenu->getPlayerName();
+    }
+    if (mPlayer.name.empty())
+        mPlayer.name = "Player";
     mMenu = nullptr;
     mMenuLoader = nullptr;
     mGameLoader = std::make_unique<DLLoader<IGame>>(path);
     mGame = mGameLoader->getInstance("createGame");
+    mPlayer.score = 0;
     mGame->init();
     mInMenu = false;
 }
 
-void Core::isGameEnded()
+bool Core::isGameEnded()
 {
     if (mGame && mGame->isOver()) {
         mPlayer.score = mGame->getScore();
         saveScore();
         goToMenu();
+        return true;
     }
+    return false;
 }
 
 void Core::updateMenuTransitions()
@@ -139,6 +214,10 @@ void Core::updateGameLogic(Input input)
     if (mInMenu) {
         if (!mMenu) return;
         mMenu->update(input);
+        char ch = '\0';
+        while (mDisplay->getTextInput(ch)) {
+            mMenu->appendPlayerName(ch);
+        }
         mDisplay->clear();
         mDisplay->draw(mMenu->getMap());
         mDisplay->display();
@@ -152,10 +231,11 @@ void Core::updateGameLogic(Input input)
             mGame->onMouseClick(mouseX, mouseY, mouseButton);
         }
         mGame->update(input);
+        if (isGameEnded())
+            return;
         mDisplay->clear();
         mDisplay->draw(mGame->getMap());
         mDisplay->display();
-        isGameEnded();
     }
 }
 

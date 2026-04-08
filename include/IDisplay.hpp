@@ -31,6 +31,7 @@ enum class Input {
     MENU,                    // Esc
     EXIT,                    // E
     SELECT,                  // Enter
+    BACKSPACE,               // Backspace
     TOGGLE_SOUND             // Space
 };
 
@@ -62,6 +63,7 @@ class IDisplay {
         virtual void draw(const std::vector<Tile> &tiles) = 0;
         virtual Input getInput() = 0;
         virtual bool getMouseClick(int &x, int &y, int &button) = 0;
+        virtual bool getTextInput(char &ch) = 0;
 };
 
 #endif /* IDISPLAY_HPP */

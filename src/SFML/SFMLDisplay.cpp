@@ -91,6 +91,7 @@ Input SFMLDisplay::getInput()
                 case sf::Keyboard::Escape: key = Input::MENU; break;
                 case sf::Keyboard::E:      key = Input::EXIT; break;
                 case sf::Keyboard::Enter:  key = Input::SELECT; break;
+                case sf::Keyboard::BackSpace: key = Input::BACKSPACE; break;
                 case sf::Keyboard::Space:  key = Input::TOGGLE_SOUND; break;
                 default: break;
             }
@@ -109,6 +110,11 @@ Input SFMLDisplay::getInput()
                 _mouseClicks.push({x, y, button});
             }
         }
+        if (event.type == sf::Event::TextEntered) {
+            if (event.text.unicode >= 32 && event.text.unicode < 127) {
+                _textInputs.push(static_cast<char>(event.text.unicode));
+            }
+        }
     }
     return result;
 }
@@ -122,6 +128,15 @@ bool SFMLDisplay::getMouseClick(int &x, int &y, int &button)
     x = click.x;
     y = click.y;
     button = click.button;
+    return true;
+}
+
+bool SFMLDisplay::getTextInput(char &ch)
+{
+    if (_textInputs.empty())
+        return false;
+    ch = _textInputs.front();
+    _textInputs.pop();
     return true;
 }
 

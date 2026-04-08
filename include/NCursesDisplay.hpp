@@ -9,6 +9,7 @@
     #define NCURSESDISPLAY_HPP
 
 #include "IDisplay.hpp"
+#include <queue>
 #include <unordered_map>
 
 class NCursesDisplay : public IDisplay {
@@ -24,12 +25,14 @@ class NCursesDisplay : public IDisplay {
 
         Input getInput() override;
         bool getMouseClick(int &x, int &y, int &button) override;
+        bool getTextInput(char &ch) override;
 
     private:
         int mWidth;
         int mHeight;
         int mNextPair = 1;
         std::unordered_map<int, int> mColorPairs;
+        std::queue<char> mTextInputs;
 
         int toNCursesColor(u_int8_t channel);
         int getColorPair(const Color &c);

@@ -30,6 +30,7 @@ class SDL2Display : public IDisplay {
 
         Input getInput() override;
         bool getMouseClick(int &x, int &y, int &button) override;
+        bool getTextInput(char &ch) override;
 
     private:
         SDL_Window* _window = nullptr;
@@ -43,6 +44,7 @@ class SDL2Display : public IDisplay {
             int button;
         };
         std::queue<MouseClick> _mouseClicks;
+        std::queue<char> _textInputs;
 
         SDL_Color toSDLColor(const Color &c) const;
         void drawText(const Tile &tile, const SDL_Color &c);
