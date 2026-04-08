@@ -19,6 +19,22 @@ static Core *g_coreInstance = nullptr;
 
 namespace {
     const char *kSaveFile = "./arcade.sav";
+
+    void splitGameAndName(const std::string &value, std::string &game, std::string &name)
+    {
+        size_t sep = value.find(": ");
+        if (sep == std::string::npos) {
+            game = "Unknown";
+            name = value;
+            return;
+        }
+        game = value.substr(0, sep);
+        name = value.substr(sep + 2);
+        if (game.empty())
+            game = "Unknown";
+        if (name.empty())
+            name = "Player";
+    }
 }
 
 void signalHandler(int signal)
@@ -48,8 +64,12 @@ void Core::goToMenu()
     mMenu->setGameLibs(mLibManager.getGameLibs());
     mMenu->setDisplayLibs(mLibManager.getDisplayLibs());
     std::vector<std::pair<std::string, int>> scores;
-    for (const auto& player : mScores)
-        scores.push_back({player.name, player.highScore});
+    for (const auto& player : mScores) {
+        std::string label = player.name;
+        if (!player.game.empty())
+            label = player.game + ": " + player.name;
+        scores.push_back({label, player.highScore});
+    }
     mMenu->setScores(scores);
     if (!mLastSaveMessage.empty()) {
         mMenu->setStatusMessage(mLastSaveMessage);
@@ -67,9 +87,11 @@ void Core::saveScore()
 {
     if (mPlayer.name.empty())
         mPlayer.name = "Player";
+    if (mPlayer.game.empty())
+        mPlayer.game = "Unknown";
     bool found = false;
     for (auto &entry : mScores) {
-        if (entry.name == mPlayer.name) {
+        if (entry.name == mPlayer.name && entry.game == mPlayer.game) {
             entry.highScore = std::max(entry.highScore, mPlayer.score);
             found = true;
             break;
@@ -77,6 +99,7 @@ void Core::saveScore()
     }
     if (!found) {
         Player entry;
+        entry.game = mPlayer.game;
         entry.name = mPlayer.name;
         entry.highScore = mPlayer.score;
         mScores.push_back(entry);
@@ -86,7 +109,7 @@ void Core::saveScore()
     if (!out)
         return;
     for (const auto &entry : mScores)
-        out << entry.name << "\t" << entry.highScore << "\n";
+        out << entry.game << ": " << entry.name << "\t" << entry.highScore << "\n";
     mLastSaveMessage = "save OK";
 }
 
@@ -103,14 +126,17 @@ void Core::loadScores()
         size_t tab = line.rfind('\t');
         if (tab == std::string::npos)
             continue;
-        std::string name = line.substr(0, tab);
+        std::string left = line.substr(0, tab);
         std::string scoreStr = line.substr(tab + 1);
         int score = 0;
         std::istringstream scoreStream(scoreStr);
         scoreStream >> score;
+        std::string game;
+        std::string name;
+        splitGameAndName(left, game, name);
         bool found = false;
         for (auto &entry : mScores) {
-            if (entry.name == name) {
+            if (entry.name == name && entry.game == game) {
                 entry.highScore = std::max(entry.highScore, score);
                 found = true;
                 break;
@@ -118,6 +144,7 @@ void Core::loadScores()
         }
         if (!found) {
             Player entry;
+            entry.game = game;
             entry.name = name;
             entry.highScore = score;
             mScores.push_back(entry);
@@ -170,6 +197,9 @@ void Core::switchGame(const std::string &path)
     mGame = mGameLoader->getInstance("createGame");
     mPlayer.score = 0;
     mGame->init();
+    mPlayer.game = mGame ? mGame->getName() : "Unknown";
+    if (mPlayer.game.empty())
+        mPlayer.game = "Unknown";
     mInMenu = false;
 }
 

@@ -18,6 +18,7 @@
     #include "LibManager.hpp"
 
 struct Player {
+    std::string game;
     std::string name;
     int score = 0;
     int highScore = 0;
