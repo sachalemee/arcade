@@ -29,9 +29,9 @@ GRAPHICS_NCURSES_OBJ	=	$(GRAPHICS_NCURSES_SRC:.cpp=.o)
 GRAPHICS_SDL2_OBJ		=	$(GRAPHICS_SDL2_SRC:.cpp=.o)
 GRAPHICS_SFML_OBJ		=	$(GRAPHICS_SFML_SRC:.cpp=.o)
 
-GRAPHICS_SO		=	$(LIB_DIR)/arcade_ncurses.so \
-					$(LIB_DIR)/arcade_sdl2.so \
-					$(LIB_DIR)/arcade_sfml.so
+GRAPHICS_SO				=	$(LIB_DIR)/arcade_ncurses.so \
+							$(LIB_DIR)/arcade_sdl2.so \
+							$(LIB_DIR)/arcade_sfml.so
 
 GAMES_MINESWEEPER_SRC	= 	games/Minesweeper.cpp
 GAMES_SNAKE_SRC			= 	games/Snake.cpp
@@ -103,4 +103,8 @@ fclean:			clean
 
 re:				fclean all
 
-.PHONY:			all core games graphicals lib clean fclean re
+reset:
+				$(RM) *.sav
+				@echo "✓ Save files cleaned"
+
+.PHONY:			all core games graphicals lib clean fclean re reset

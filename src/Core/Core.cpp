@@ -187,6 +187,22 @@ void Core::handleInput(Input input)
     }
     if (input == Input::RESTART && mGame)
         mGame->init();
+    if (input == Input::NEXT_LIB) {
+        const auto &displays = mLibManager.getDisplayLibs();
+        if (!displays.empty()) {
+            static int currentDisplay = 0;
+            currentDisplay = (currentDisplay + 1) % displays.size();
+            switchDisplay(displays[currentDisplay]);
+        }
+    }
+    if (input == Input::NEXT_GAME && !mInMenu) {
+        const auto &games = mLibManager.getGameLibs();
+        if (!games.empty()) {
+            static int currentGame = 0;
+            currentGame = (currentGame + 1) % games.size();
+            switchGame(games[currentGame]);
+        }
+    }
 }
 
 void Core::switchDisplay(const std::string &path)
@@ -209,6 +225,8 @@ void Core::switchGame(const std::string &path)
         mPlayer.name = mMenu->getPlayerName();
     if (mPlayer.name.empty())
         mPlayer.name = "Player";
+    mGame = nullptr;  // Important: nullify before destroying loader (dlclose)
+    mGameLoader = nullptr;
     mMenu = nullptr;
     mMenuLoader = nullptr;
     mGameLoader = std::make_unique<DLLoader<IGame>>(path);
