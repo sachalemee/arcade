@@ -131,6 +131,10 @@ Input SFMLDisplay::getInput()
             return handleKey(event.key.code);
         if (event.type == sf::Event::MouseButtonPressed)
             handleMouse(event);
+        if (event.type == sf::Event::TextEntered) {
+            if (event.text.unicode >= 32 && event.text.unicode < 127)
+                mTextInputs.push(static_cast<char>(event.text.unicode));
+        }
     }
     return Input::NONE;
 }
@@ -160,8 +164,11 @@ bool SFMLDisplay::getMouseClick(int &x, int &y, int &button)
 
 bool SFMLDisplay::getTextInput(char &ch)
 {
-    (void)ch;
-    return false;
+    if (mTextInputs.empty())
+        return false;
+    ch = mTextInputs.front();
+    mTextInputs.pop();
+    return true;
 }
 
 extern "C" {

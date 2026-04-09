@@ -44,6 +44,7 @@ class SFMLDisplay : public IDisplay {
             int button;
         };
         std::queue<MouseClick> mMouseClicks;
+        std::queue<char> mTextInputs;
 };
 
 #endif /* SFMLDISPLAY_HPP */
