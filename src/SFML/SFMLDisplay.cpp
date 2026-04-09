@@ -101,6 +101,23 @@ Input SFMLDisplay::handleKey(sf::Keyboard::Key key)
     }
 }
 
+void SFMLDisplay::handleMouse(const sf::Event &event)
+{
+    int button = 0;
+    int x = 0;
+    int y = 0;
+
+    if (event.mouseButton.button == sf::Mouse::Left)
+        button = 1;
+    else if (event.mouseButton.button == sf::Mouse::Right)
+        button = 2;
+    if (button == 0)
+        return;
+    x = event.mouseButton.x / TILE_SIZE;
+    y = event.mouseButton.y / TILE_SIZE;
+    mMouseClicks.push({x, y, button});
+}
+
 Input SFMLDisplay::getInput()
 {
     sf::Event event;
@@ -112,6 +129,8 @@ Input SFMLDisplay::getInput()
             return Input::EXIT;
         if (event.type == sf::Event::KeyPressed)
             return handleKey(event.key.code);
+        if (event.type == sf::Event::MouseButtonPressed)
+            handleMouse(event);
     }
     return Input::NONE;
 }
@@ -127,10 +146,16 @@ void SFMLDisplay::init(int width, int height, const std::string &title)
 
 bool SFMLDisplay::getMouseClick(int &x, int &y, int &button)
 {
-    (void)x;
-    (void)y;
-    (void)button;
-    return false;
+    MouseClick click;
+
+    if (mMouseClicks.empty())
+        return false;
+    click = mMouseClicks.front();
+    mMouseClicks.pop();
+    x = click.x;
+    y = click.y;
+    button = click.button;
+    return true;
 }
 
 bool SFMLDisplay::getTextInput(char &ch)
