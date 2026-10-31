@@ -60,13 +60,13 @@ Create your library in `src/YourLib/YourLib.cpp` with a header file.
 
 Here's what you need to do:
 
-1. Inherit from `IDisplay` in [include/IDisplay.hpp](include/IDisplay.hpp)
+1. Inherit from `IDisplay` in [include/IDisplay.hpp](../include/IDisplay.hpp)
 2. Implement the methods: `displayTile()`, `clear()`, `refresh()`, `getInput()`
 3. Add a C factory function: `extern "C" { IDisplay *createDisplay() { ... } }`
 4. Update the Makefile to build it with `-shared`
 5. Output goes to `./lib/arcade_yourlib.so`
 
-Check out [src/NCurses/NCursesDisplay.cpp](src/NCurses/NCursesDisplay.cpp) for a complete example.
+Check out [src/NCurses/NCursesDisplay.cpp](../src/NCurses/NCursesDisplay.cpp) for a complete example.
 
 ---
 
@@ -76,13 +76,13 @@ Create your game in `games/YourGame.cpp` with a header file.
 
 Here's what you need to do:
 
-1. Inherit from `IGame` in [include/IGame.hpp](include/IGame.hpp)
+1. Inherit from `IGame` in [include/IGame.hpp](../include/IGame.hpp)
 2. Implement: `update()`, `getTilesToDisplay()`, `isGameOver()`, `getScore()`, `getPlayerName()`
 3. Add a C factory function: `extern "C" { IGame *createGame() { ... } }`
 4. Update the Makefile to build it with `-shared`
 5. Output goes to `./lib/arcade_yourgame.so`
 
-See [games/Snake.cpp](games/Snake.cpp) for a complete example.
+See [games/Snake.cpp](../games/Snake.cpp) for a complete example.
 
 ---
 
@@ -92,4 +92,4 @@ See [games/Snake.cpp](games/Snake.cpp) for a complete example.
 - All `.so` files must be treated the same way, no special cases
 - Name all libraries as `arcade_<name>.so`
 - Use the factory pattern: export `createDisplay` or `createGame` as C functions
-- Use [include/DLLoader.hpp](include/DLLoader.hpp) for safe dynamic loading
+- Use [include/DLLoader.hpp](../include/DLLoader.hpp) for safe dynamic loading
